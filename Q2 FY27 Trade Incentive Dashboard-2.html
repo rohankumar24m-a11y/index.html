@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Q2 FY27 Trade Incentive Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: #101314;
+  --panel: #171b1d;
+  --panel-2: #1d2224;
+  --line: #2a3033;
+  --line-soft: #23282a;
+  --ink: #eef1f0;
+  --ink-dim: #a7b0ad;
+  --ink-faint: #6f7a77;
+  --coral: #e8734a;
+  --teal: #16a190;
+  --purple: #8b6cd9;
+  --green: #4caf7d;
+  --amber: #e0b23e;
+  --red: #d9615a;
+  --radius: 14px;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
+:root:not([data-theme="light"]){ }
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f5f4f1; --panel:#ffffff; --panel-2:#faf9f7; --line:#e3e0da; --line-soft:#ececE8;
+    --ink:#1b1d1d; --ink-dim:#5b615e; --ink-faint:#8b918d;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f5f4f1; --panel:#ffffff; --panel-2:#faf9f7; --line:#e3e0da; --line-soft:#ececE8;
+  --ink:#1b1d1d; --ink-dim:#5b615e; --ink-faint:#8b918d;
+}
+*{box-sizing:border-box;}
+html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.disp{font-family:'Space Grotesk',system-ui,sans-serif;}
+.wrap{max-width:1360px;margin:0 auto;padding:0 20px 60px;}
+::selection{background:var(--coral);color:#fff;}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, var(--panel), var(--bg));
+  padding:18px 0 16px;
+  position:sticky; top:0; z-index:40;
+  padding-top: calc(18px + env(safe-area-inset-top, 0px));
+  backdrop-filter: blur(6px);
+}
+.topbar-inner{display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+.brand{display:flex; align-items:center; gap:10px;}
+.brand-dots{display:inline-flex; gap:3px;}
+.brand-dots span{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.brand h1{font-size:19px; margin:0; font-weight:700; letter-spacing:-0.01em;}
+.brand .sub{font-size:12px; color:var(--ink-faint); margin-top:1px;}
+.topbar-right{margin-left:auto; display:flex; gap:8px; align-items:center;}
+.theme-toggle, .view-toggle button{
+  background:var(--panel-2); border:1px solid var(--line); color:var(--ink-dim);
+  border-radius:10px; padding:8px 12px; font-size:13px; cursor:pointer; font-weight:600;
+  font-family:inherit;
+}
+.view-toggle{display:flex; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:3px; gap:2px;}
+.view-toggle button{border:none; background:transparent; padding:7px 14px; border-radius:8px;}
+.view-toggle button.active{background:var(--coral); color:#fff;}
+
+/* ---------- Layout ---------- */
+.layout{display:grid; grid-template-columns: 300px 1fr; gap:20px; margin-top:20px;}
+@media (max-width: 900px){ .layout{grid-template-columns:1fr;} }
+
+/* ---------- Roster panel ---------- */
+.roster{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:14px; height:fit-content; position:sticky; top:96px;}
+@media (max-width:900px){ .roster{position:static;} }
+.search-box{
+  width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+  padding:10px 12px; color:var(--ink); font-size:14px; font-family:inherit; margin-bottom:10px;
+}
+.search-box:focus{outline:2px solid var(--teal); outline-offset:-1px;}
+.chip-row{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;}
+.chip{
+  font-size:11.5px; padding:5px 10px; border-radius:999px; border:1px solid var(--line);
+  background:var(--panel-2); color:var(--ink-dim); cursor:pointer; font-weight:600;
+}
+.chip.active{background:var(--ink); color:var(--bg); border-color:var(--ink);}
+.roster-list{max-height:640px; overflow-y:auto; display:flex; flex-direction:column; gap:5px; margin:0 -4px; padding:0 4px;}
+.emp-row{
+  display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; cursor:pointer;
+  border:1px solid transparent;
+}
+.emp-row:hover{background:var(--panel-2);}
+.emp-row.active{background:var(--panel-2); border-color:var(--line);}
+.emp-avatar{
+  width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; color:#fff; flex-shrink:0;
+}
+.emp-meta{min-width:0; flex:1;}
+.emp-name{font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.emp-office{font-size:11px; color:var(--ink-faint);}
+.emp-pct{font-size:12px; font-weight:700; flex-shrink:0;}
+.roster-count{font-size:11px; color:var(--ink-faint); margin-bottom:8px;}
+
+/* ---------- Detail panel ---------- */
+.detail{display:flex; flex-direction:column; gap:16px;}
+.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:20px;}
+.hero{
+  display:grid; grid-template-columns: 1.3fr 1fr; gap:0; overflow:hidden; padding:0;
+}
+@media (max-width:720px){ .hero{grid-template-columns:1fr;} }
+.hero-left{padding:22px 24px; border-right:1px solid var(--line);}
+@media (max-width:720px){ .hero-left{border-right:none; border-bottom:1px solid var(--line);} }
+.hero-right{padding:22px 24px; background:var(--panel-2); display:flex; flex-direction:column; justify-content:center; gap:14px;}
+.hero-id{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+.hero-avatar{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:16px;flex-shrink:0;}
+.hero-name{font-size:20px; font-weight:700; margin:0;}
+.hero-tags{display:flex; gap:6px; margin-top:4px;}
+.tag{font-size:11px; padding:3px 8px; border-radius:6px; background:var(--panel-2); border:1px solid var(--line); color:var(--ink-dim); font-weight:600;}
+.hero-stat-row{display:flex; gap:24px; margin-top:16px; flex-wrap:wrap;}
+.hstat-label{font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; margin-bottom:4px; font-weight:600;}
+.hstat-val{font-size:22px; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+.money-label{font-size:11.5px; color:var(--ink-faint); font-weight:600;}
+.money-val{font-size:34px; font-weight:700; font-family:'Space Grotesk',sans-serif; line-height:1.1; margin:4px 0 2px;}
+.money-sub{font-size:12.5px; color:var(--ink-dim);}
+.eligibility-banner{
+  border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600; margin-top:2px; display:flex; align-items:center; gap:8px;
+}
+.elig-ok{background:rgba(76,175,125,.12); color:var(--green); border:1px solid rgba(76,175,125,.3);}
+.elig-bad{background:rgba(217,97,90,.12); color:var(--red); border:1px solid rgba(217,97,90,.3);}
+
+/* progress bars */
+.bar-track{height:8px; background:var(--line-soft); border-radius:999px; overflow:hidden; position:relative;}
+.bar-fill{height:100%; border-radius:999px; transition:width .25s ease;}
+
+/* param grid */
+.param-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px;}
+@media (max-width:720px){ .param-grid{grid-template-columns:1fr;} }
+.param-card{border:1px solid var(--line); border-radius:12px; padding:16px; background:var(--panel-2);}
+.param-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;}
+.param-name{font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px;}
+.dot{width:9px;height:9px;border-radius:50%; flex-shrink:0;}
+.param-weight{font-size:11px; color:var(--ink-faint); font-weight:600;}
+.param-payout{font-size:20px; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+.param-rows{font-size:12.5px; color:var(--ink-dim); margin-top:10px; display:flex; flex-direction:column; gap:4px;}
+.param-rows .r{display:flex; justify-content:space-between;}
+.param-rows b{color:var(--ink); font-weight:600;}
+.btg-note{margin-top:10px; font-size:12px; padding:8px 10px; border-radius:8px; background:var(--bg); border:1px solid var(--line); color:var(--ink-dim);}
+.btg-note b{color:var(--amber);}
+.est-flag{font-size:10px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color:var(--ink-faint); border:1px solid var(--line); border-radius:5px; padding:1px 6px; margin-left:6px;}
+
+/* simulator */
+.sim-row{padding:16px 0; border-bottom:1px solid var(--line-soft);}
+.sim-row:last-child{border-bottom:none;}
+.sim-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; gap:10px; flex-wrap:wrap;}
+.sim-title{font-size:13.5px; font-weight:700; display:flex; align-items:center; gap:8px;}
+.sim-value{font-size:13px; color:var(--ink-dim); font-weight:600;}
+.sim-value b{color:var(--ink); font-family:'Space Grotesk',sans-serif; font-size:14px;}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background:var(--line-soft); outline:none; margin:6px 0 4px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--coral);
+  border:3px solid var(--panel); box-shadow:0 0 0 1px var(--coral); cursor:pointer; margin-top:-1px;
+}
+input[type=range]::-moz-range-thumb{
+  width:16px; height:16px; border-radius:50%; background:var(--coral); border:3px solid var(--panel); box-shadow:0 0 0 1px var(--coral); cursor:pointer;
+}
+.sim-scale{display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-faint);}
+.sim-reset{font-size:12px; color:var(--teal); cursor:pointer; font-weight:600; background:none; border:none; font-family:inherit; padding:0;}
+
+.sim-summary{
+  display:flex; gap:20px; align-items:center; flex-wrap:wrap; padding:18px 20px; border-radius:12px;
+  background:linear-gradient(135deg, rgba(232,115,74,.12), rgba(22,161,144,.08)); border:1px solid var(--line); margin-top:4px;
+}
+.sim-summary .big{font-size:30px; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+.sim-summary .delta{font-size:13px; font-weight:700; padding:3px 9px; border-radius:999px;}
+.delta-pos{background:rgba(76,175,125,.15); color:var(--green);}
+.delta-neg{background:rgba(217,97,90,.15); color:var(--red);}
+.delta-zero{background:var(--panel-2); color:var(--ink-faint);}
+
+.ladder{display:flex; flex-direction:column; gap:8px; margin-top:14px;}
+.ladder-row{
+  display:grid; grid-template-columns:80px 1fr auto; align-items:center; gap:14px;
+  padding:12px 14px; border-radius:10px; background:var(--panel-2); border:1px solid var(--line);
+}
+.ladder-row.ladder-next{border-color:var(--coral); background:rgba(232,115,74,.08);}
+@media (max-width:560px){ .ladder-row{grid-template-columns:60px 1fr auto; gap:8px; padding:10px;} }
+.ladder-slab{text-align:left;}
+.ladder-pct{font-size:19px; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+.ladder-tag{font-size:10px; text-transform:uppercase; letter-spacing:.04em; font-weight:700; color:var(--coral); margin-top:2px;}
+.ladder-mid{min-width:0;}
+.ladder-need{font-size:13.5px; font-weight:700;}
+.ladder-sub{font-size:11.5px; color:var(--ink-faint); margin-top:2px;}
+.ladder-money{font-size:16px; font-weight:700; font-family:'Space Grotesk',sans-serif; text-align:right; white-space:nowrap;}
+
+.section-title{font-size:15px; font-weight:700; margin:0 0 4px;}
+.section-sub{font-size:12.5px; color:var(--ink-faint); margin:0 0 16px;}
+
+/* team table */
+table{width:100%; border-collapse:collapse; font-size:13px;}
+thead th{
+  text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint);
+  padding:9px 10px; border-bottom:1px solid var(--line); cursor:pointer; white-space:nowrap; font-weight:700;
+}
+thead th:hover{color:var(--ink);}
+tbody td{padding:10px 10px; border-bottom:1px solid var(--line-soft); white-space:nowrap;}
+tbody tr{cursor:pointer;}
+tbody tr:hover{background:var(--panel-2);}
+.table-wrap{overflow-x:auto; border-radius:10px;}
+.mini-avatar{width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;margin-right:8px; vertical-align:middle;}
+.rank-badge{font-size:11px; color:var(--ink-faint); font-weight:700; width:22px; display:inline-block;}
+.pill{font-size:11px; padding:2px 8px; border-radius:999px; font-weight:700;}
+.pill-hi{background:rgba(76,175,125,.15); color:var(--green);}
+.pill-mid{background:rgba(224,178,62,.15); color:var(--amber);}
+.pill-lo{background:rgba(217,97,90,.15); color:var(--red);}
+
+.summary-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px;}
+@media (max-width:720px){ .summary-strip{grid-template-columns:repeat(2,1fr);} }
+.sstat{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;}
+.sstat-label{font-size:11.5px; color:var(--ink-faint); font-weight:600; margin-bottom:6px;}
+.sstat-val{font-size:22px; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+
+.footnote{font-size:11.5px; color:var(--ink-faint); line-height:1.6; margin-top:6px;}
+.disclaimer{
+  font-size:12px; color:var(--ink-dim); background:var(--panel-2); border:1px solid var(--line);
+  border-radius:10px; padding:12px 14px; line-height:1.55; margin-top:4px;
+}
+.disclaimer b{color:var(--ink);}
+
+.sync-badge{font-size:11.5px; font-weight:700; padding:6px 10px; border-radius:999px; color:var(--ink-faint);}
+.sync-badge.sync-live{color:var(--green);}
+.sync-badge.sync-offline{color:var(--ink-faint);}
+.sync-badge.sync-readonly{color:var(--amber);}
+
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:100; display:flex; align-items:center; justify-content:center; padding:20px;
+  padding-top: calc(20px + env(safe-area-inset-top,0px)); padding-bottom: calc(20px + env(safe-area-inset-bottom,0px));
+}
+.modal{
+  background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:22px; width:100%; max-width:540px;
+  max-height:90vh; overflow-y:auto;
+}
+.modal-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+.modal-close{background:none; border:none; color:var(--ink-faint); font-size:22px; cursor:pointer; line-height:1; padding:2px 6px;}
+.modal-tabs{display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--line);}
+.modal-tab{
+  background:none; border:none; color:var(--ink-faint); font-weight:700; font-size:13px; padding:8px 4px; margin-right:14px;
+  cursor:pointer; border-bottom:2px solid transparent; font-family:inherit;
+}
+.modal-tab.active{color:var(--ink); border-bottom-color:var(--coral);}
+.modal-tab-panel.hidden{display:none;}
+.mlabel{display:block; font-size:12px; font-weight:600; color:var(--ink-dim); margin:12px 0 5px;}
+.minput{
+  width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:9px 11px;
+  color:var(--ink); font-size:14px; font-family:inherit;
+}
+.mtextarea{min-height:140px; font-family:ui-monospace,monospace; font-size:12.5px; resize:vertical; line-height:1.6;}
+.mrow{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+@media (max-width:480px){ .mrow{grid-template-columns:1fr;} }
+.modal-submit{
+  margin-top:16px; width:100%; background:var(--coral); color:#fff; border:none; border-radius:10px; padding:11px;
+  font-size:14px; font-weight:700; cursor:pointer; font-family:inherit;
+}
+.modal-submit:disabled{opacity:.5; cursor:not-allowed;}
+.modal-footer{display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding-top:14px; border-top:1px solid var(--line-soft); font-size:12px; color:var(--ink-faint);}
+.modal-status-msg{font-size:12.5px; padding:8px 12px; border-radius:8px; margin-bottom:12px;}
+.status-ok{background:rgba(76,175,125,.12); color:var(--green);}
+.status-err{background:rgba(217,97,90,.12); color:var(--red);}
+
+.hidden{display:none !important;}
+::-webkit-scrollbar{width:9px; height:9px;}
+::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-dots"><span style="background:var(--teal)"></span><span style="background:var(--coral)"></span><span style="background:var(--purple)"></span></span>
+      <div>
+        <h1>Q2 FY27 Incentive Dashboard</h1>
+        <div class="sub">Trade Team &middot; Territory Sales, live payout simulator</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span id="syncBadge" class="sync-badge sync-offline">&#9679; Connecting&hellip;</span>
+      <button class="theme-toggle" id="updateBtn">&#9998; Update numbers</button>
+      <div class="view-toggle" id="viewToggle">
+        <button data-view="individual" class="active">Employee</button>
+        <button data-view="team">Team</button>
+      </div>
+      <button class="theme-toggle" id="themeToggle">&#9728;&#65039; Theme</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="individualView" class="layout">
+    <div class="roster">
+      <input class="search-box" id="searchBox" placeholder="Search name...">
+      <div class="chip-row" id="officeChips"></div>
+      <div class="roster-count" id="rosterCount"></div>
+      <div class="roster-list" id="rosterList"></div>
+    </div>
+    <div class="detail" id="detailPanel"></div>
+  </div>
+
+  <div id="teamView" class="hidden">
+    <div class="summary-strip" id="teamSummary"></div>
+    <div class="card">
+      <h2 class="section-title">Team payout board</h2>
+      <p class="section-sub">Click any row to jump to that person's simulator. Sort by clicking a column header.</p>
+      <div class="table-wrap">
+        <table id="teamTable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="updateModalBackdrop" class="modal-backdrop hidden">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 class="section-title" style="margin:0;">Update revenue numbers</h2>
+      <button id="closeModalBtn" class="modal-close">&times;</button>
+    </div>
+    <div id="modalStatus"></div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-tab="single">Single person</button>
+      <button class="modal-tab" data-tab="bulk">Bulk paste</button>
+    </div>
+    <div id="tabSingle" class="modal-tab-panel">
+      <label class="mlabel">Employee</label>
+      <select id="singleEmpSelect" class="minput"></select>
+      <div class="mrow">
+        <div>
+          <label class="mlabel">Trade value achieved (Lakhs)</label>
+          <input type="number" step="0.01" id="singleAchTrade" class="minput" placeholder="e.g. 92.4">
+        </div>
+        <div>
+          <label class="mlabel">Institutional value achieved (Lakhs)</label>
+          <input type="number" step="0.01" id="singleAchInsti" class="minput" placeholder="optional">
+        </div>
+      </div>
+      <p class="section-sub" style="margin-top:8px;">Targets stay as published in the circular unless you enter new ones below.</p>
+      <div class="mrow">
+        <div>
+          <label class="mlabel">Trade target (Lakhs) &mdash; optional</label>
+          <input type="number" step="0.01" id="singleTgtTrade" class="minput" placeholder="leave blank to keep original">
+        </div>
+        <div>
+          <label class="mlabel">Institutional target (Lakhs) &mdash; optional</label>
+          <input type="number" step="0.01" id="singleTgtInsti" class="minput" placeholder="leave blank to keep original">
+        </div>
+      </div>
+      <button id="singleSubmitBtn" class="modal-submit">Save &amp; push to everyone</button>
+    </div>
+    <div id="tabBulk" class="modal-tab-panel hidden">
+      <label class="mlabel">Paste one line per person: <code>Name, Trade Achieved[, Institutional Achieved]</code></label>
+      <textarea id="bulkText" class="minput mtextarea" placeholder="Nishchal Burnwal, 92.4
+Aman Kumar, 78.1, 12.5
+Roshan Kumar, 105.2"></textarea>
+      <button id="bulkSubmitBtn" class="modal-submit">Save all &amp; push to everyone</button>
+      <div id="bulkResult" class="section-sub" style="margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <span id="overrideCount"></span>
+      <button id="clearOverridesBtn" class="sim-reset">Reset everyone to original circular numbers</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const EMP_DATA = [{"name": "Nishchal Burnwal", "office": "Dhanbad", "type": "TSM", "rev_tgt_trade": 154.57607354727998, "rev_ach_trade": 128.83611489999998, "rev_achpct_trade": 0.8334803177711269, "rev_btg100": 25.73995864727999, "rev_btg110": 41.19756600200799, "rev_tgt_insti": 47.91682983629181, "rev_ach_insti": 9.1610968, "rev_achpct_insti": 0.19118745608378, "rev_tgt_total": 202.4929033835718, "rev_ach_total": 137.99721169999998, "rev_achpct_total": 0.6814915949849315, "rev_maxachv": 0.8334803177711269, "rev_payout": 0.7300000000000001, "deal_q1": 21, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 19, "deal_t100": 21, "deal_q2ach": 19, "deal_achpct": 0.9047619047619048, "deal_payout": 0.75, "deal_btg100": 2, "deal_btg_next": 3, "rng_q1prod": 288, "rng_q1deal": 21, "rng_q1bucket": "12-15", "rng_q2prod": 310, "rng_q2deal": 20, "rng_q1rb": 13.714285714285714, "rng_q2rb": 15.5, "rng_btg": 1.7857142857142865, "rng_payout": 1.5, "con_comp": 7, "con_opus": 10, "con_total": 17, "con_btg_100": -5, "con_btg_125": -3, "con_btg_150": -2, "con_btg_200": -1, "weighted_payout": 1.0150000000000001, "avg_visit": 5.033898305084746, "visit_payout": 0.9, "cei_pct": 0.8274333333333334, "cei_payout": 0.9, "current_payout": 0.82215, "final_payout": 1.1723250000000003}, {"name": "Aman Kumar", "office": "Dhanbad", "type": "TSM", "rev_tgt_trade": 92.68058614170614, "rev_ach_trade": 91.56449640000001, "rev_achpct_trade": 0.9879576749762926, "rev_btg100": 1.1160897417061335, "rev_btg110": 10.38414835587676, "rev_tgt_insti": 2.98276456365738, "rev_ach_insti": 2.8906514, "rev_achpct_insti": 0.9691181916334578, "rev_tgt_total": 95.66335070536353, "rev_ach_total": 94.4551478, "rev_achpct_total": 0.9873702635705841, "rev_maxachv": 0.9879576749762926, "rev_payout": 0.8800000000000002, "deal_q1": 29, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 26, "deal_t100": 29, "deal_q2ach": 30, "deal_achpct": 1.0344827586206897, "deal_payout": 1.3, "deal_btg100": -1, "deal_btg_next": 0, "rng_q1prod": 276, "rng_q1deal": 29, "rng_q1bucket": "less than 10", "rng_q2prod": 247, "rng_q2deal": 32, "rng_q1rb": 9.517241379310345, "rng_q2rb": 7.71875, "rng_btg": -1.7984913793103452, "rng_payout": 0, "con_comp": 4, "con_opus": 4, "con_total": 8, "con_btg_100": -3, "con_btg_125": -1, "con_btg_150": 0, "con_btg_200": 1, "weighted_payout": 0.8500000000000002, "avg_visit": 4.38, "visit_payout": 0.8, "cei_pct": 0.8775333333333333, "cei_payout": 0.95, "current_payout": 0.6460000000000001, "final_payout": 0.9817500000000005}, {"name": "BYASH PANDEY", "office": "Dhanbad", "type": "TSM", "rev_tgt_trade": 59.26878713529844, "rev_ach_trade": 37.63852969999999, "rev_achpct_trade": 0.6350480838097627, "rev_btg100": 21.630257435298446, "rev_btg110": 27.55713614882829, "rev_tgt_insti": 8.833158264444782, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 68.10194539974322, "rev_ach_total": 37.63852969999999, "rev_achpct_total": 0.5526792146548858, "rev_maxachv": 0.6350480838097627, "rev_payout": 0.53, "deal_q1": 26, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 23, "deal_t100": 26, "deal_q2ach": 20, "deal_achpct": 0.7692307692307693, "deal_payout": 0, "deal_btg100": 6, "deal_btg_next": 7, "rng_q1prod": 300, "rng_q1deal": 26, "rng_q1bucket": "10-12", "rng_q2prod": 264, "rng_q2deal": 21, "rng_q1rb": 11.538461538461538, "rng_q2rb": 12.571428571428571, "rng_btg": 1.0329670329670328, "rng_payout": 1.5, "con_comp": 4, "con_opus": 4, "con_total": 8, "con_btg_100": -3, "con_btg_125": -1, "con_btg_150": 0, "con_btg_200": 1, "weighted_payout": 0.7150000000000001, "avg_visit": 6.920634920634921, "visit_payout": 1, "cei_pct": 0.7010666666666667, "cei_payout": 0.8, "current_payout": 0.5720000000000001, "final_payout": 0.8258250000000003}, {"name": "Deepak Pandit", "office": "Dhanbad", "type": "TSE", "rev_tgt_trade": 44.35578103473327, "rev_ach_trade": 24.9834242, "rev_achpct_trade": 0.5632506883473986, "rev_btg100": 19.372356834733267, "rev_btg110": 23.8079349382066, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 44.35578103473327, "rev_ach_total": 24.9834242, "rev_achpct_total": 0.5632506883473986, "rev_maxachv": 0.5632506883473986, "rev_payout": 0, "deal_q1": 16, "deal_slab": "TSE-15-24 Dealer billed", "deal_t75": 15, "deal_t100": 18, "deal_q2ach": 17, "deal_achpct": 0.9444444444444444, "deal_payout": 0.75, "deal_btg100": 1, "deal_btg_next": 2, "rng_q1prod": 211, "rng_q1deal": 16, "rng_q1bucket": "12-15", "rng_q2prod": 217, "rng_q2deal": 18, "rng_q1rb": 13.1875, "rng_q2rb": 12.055555555555555, "rng_btg": -1.1319444444444446, "rng_payout": 0, "con_comp": 2, "con_opus": 1, "con_total": 3, "con_btg_100": 2, "con_btg_125": 4, "con_btg_150": 5, "con_btg_200": 6, "weighted_payout": 0, "avg_visit": 5.950819672131147, "visit_payout": 0.9, "cei_pct": 0.8948999999999999, "cei_payout": 0.95, "current_payout": 0, "final_payout": 0}, {"name": "Roshan Kumar", "office": "Dhanbad", "type": "TSM", "rev_tgt_trade": 62.854573940575804, "rev_ach_trade": 69.8433599, "rev_achpct_trade": 1.1111897754017321, "rev_btg100": -6.988785959424192, "rev_btg110": -0.7033285653666042, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 62.854573940575804, "rev_ach_total": 69.8433599, "rev_achpct_total": 1.1111897754017321, "rev_maxachv": 1.1111897754017321, "rev_payout": 1.52, "deal_q1": 32, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 29, "deal_t100": 32, "deal_q2ach": 31, "deal_achpct": 0.96875, "deal_payout": 0.75, "deal_btg100": 1, "deal_btg_next": 2, "rng_q1prod": 402, "rng_q1deal": 32, "rng_q1bucket": "12-15", "rng_q2prod": 400, "rng_q2deal": 33, "rng_q1rb": 12.5625, "rng_q2rb": 12.121212121212121, "rng_btg": -0.4412878787878789, "rng_payout": 0, "con_comp": 3, "con_opus": 6, "con_total": 9, "con_btg_100": -3, "con_btg_125": -1, "con_btg_150": 0, "con_btg_200": 1, "weighted_payout": 1.06, "avg_visit": 5.14, "visit_payout": 0.9, "cei_pct": 0.9292666666666666, "cei_payout": 1, "current_payout": 0.9540000000000001, "final_payout": 1.2243000000000004}, {"name": "Roshan Prajapati", "office": "Dhanbad", "type": "TSM", "rev_tgt_trade": 54.73989822557837, "rev_ach_trade": 33.892507499999994, "rev_achpct_trade": 0.619155471578188, "rev_btg100": 20.84739072557838, "rev_btg110": 26.32138054813622, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 54.73989822557837, "rev_ach_total": 33.892507499999994, "rev_achpct_total": 0.619155471578188, "rev_maxachv": 0.619155471578188, "rev_payout": 0.51, "deal_q1": 22, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 20, "deal_t100": 22, "deal_q2ach": 24, "deal_achpct": 1.0909090909090908, "deal_payout": 1.5, "deal_btg100": -2, "deal_btg_next": -1, "rng_q1prod": 300, "rng_q1deal": 22, "rng_q1bucket": "12-15", "rng_q2prod": 305, "rng_q2deal": 28, "rng_q1rb": 13.636363636363637, "rng_q2rb": 10.892857142857142, "rng_btg": -2.7435064935064943, "rng_payout": 0, "con_comp": 4, "con_opus": 6, "con_total": 10, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.7550000000000001, "avg_visit": 6.596153846153846, "visit_payout": 1, "cei_pct": 0.8347, "cei_payout": 0.9, "current_payout": 0.6795000000000001, "final_payout": 0.8720250000000003}, {"name": "Aryan C", "office": "Dhanbad", "type": "TSM", "rev_tgt_trade": 60.96836973169037, "rev_ach_trade": 30.041728499999998, "rev_achpct_trade": 0.4927428539127362, "rev_btg100": 30.926641231690375, "rev_btg110": 37.02347820485942, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 60.96836973169037, "rev_ach_total": 30.041728499999998, "rev_achpct_total": 0.4927428539127362, "rev_maxachv": 0.4927428539127362, "rev_payout": 0, "deal_q1": 22, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 20, "deal_t100": 22, "deal_q2ach": 21, "deal_achpct": 0.9545454545454546, "deal_payout": 0.75, "deal_btg100": 1, "deal_btg_next": 2, "rng_q1prod": 334, "rng_q1deal": 22, "rng_q1bucket": "15 & Above", "rng_q2prod": 223, "rng_q2deal": 21, "rng_q1rb": 15.181818181818182, "rng_q2rb": 10.619047619047619, "rng_btg": -4.562770562770563, "rng_payout": 0, "con_comp": 4, "con_opus": 6, "con_total": 10, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0, "avg_visit": 5.2592592592592595, "visit_payout": 0.9, "cei_pct": 0.6261, "cei_payout": 0.7, "current_payout": 0, "final_payout": 0}, {"name": "Shamsher Ansari", "office": "Dhanbad", "type": "TSE", "rev_tgt_trade": 51.3407330327945, "rev_ach_trade": 34.19055900000001, "rev_achpct_trade": 0.6659538534083723, "rev_btg100": 17.150174032794496, "rev_btg110": 22.284247336073953, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 51.3407330327945, "rev_ach_total": 34.19055900000001, "rev_achpct_total": 0.6659538534083723, "rev_maxachv": 0.6659538534083723, "rev_payout": 0.56, "deal_q1": 13, "deal_slab": "TSE-<15 Dealer billed", "deal_t75": 15, "deal_t100": 18, "deal_q2ach": 14, "deal_achpct": 0.7777777777777778, "deal_payout": 0, "deal_btg100": 4, "deal_btg_next": 5, "rng_q1prod": 171, "rng_q1deal": 13, "rng_q1bucket": "12-15", "rng_q2prod": 169, "rng_q2deal": 16, "rng_q1rb": 13.153846153846153, "rng_q2rb": 10.5625, "rng_btg": -2.5913461538461533, "rng_payout": 0, "con_comp": 1, "con_opus": 6, "con_total": 7, "con_btg_100": -1, "con_btg_125": 1, "con_btg_150": 2, "con_btg_200": 3, "weighted_payout": 0.38, "avg_visit": 6.903225806451613, "visit_payout": 1, "cei_pct": 0.9793999999999999, "cei_payout": 1, "current_payout": 0.38, "final_payout": 0.43890000000000007}, {"name": "Shankar Sah", "office": "Dhanbad", "type": "TSE", "rev_tgt_trade": 46.76532648927872, "rev_ach_trade": 29.3215016, "rev_achpct_trade": 0.6269923424296452, "rev_btg100": 17.44382488927872, "rev_btg110": 22.120357538206594, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 46.76532648927872, "rev_ach_total": 29.3215016, "rev_achpct_total": 0.6269923424296452, "rev_maxachv": 0.6269923424296452, "rev_payout": 0.52, "deal_q1": 14, "deal_slab": "TSE-<15 Dealer billed", "deal_t75": 15, "deal_t100": 18, "deal_q2ach": 11, "deal_achpct": 0.6111111111111112, "deal_payout": 0, "deal_btg100": 7, "deal_btg_next": 8, "rng_q1prod": 154, "rng_q1deal": 14, "rng_q1bucket": "10-12", "rng_q2prod": 121, "rng_q2deal": 12, "rng_q1rb": 11, "rng_q2rb": 10.083333333333334, "rng_btg": -0.9166666666666661, "rng_payout": 0, "con_comp": 3, "con_opus": 2, "con_total": 5, "con_btg_100": 0, "con_btg_125": 2, "con_btg_150": 3, "con_btg_200": 4, "weighted_payout": 0.34, "avg_visit": 1.4482758620689655, "visit_payout": 0.8, "cei_pct": 0.62, "cei_payout": 0.7, "current_payout": 0.1904, "final_payout": 0.39270000000000005}, {"name": "Shubham Raj", "office": "Dhanbad", "type": "TSM", "rev_tgt_trade": 34.99725609663635, "rev_ach_trade": 23.006945199999997, "rev_achpct_trade": 0.6573928292112946, "rev_btg100": 11.990310896636352, "rev_btg110": 15.490036506299987, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 34.99725609663635, "rev_ach_total": 23.006945199999997, "rev_achpct_total": 0.6573928292112946, "rev_maxachv": 0.6573928292112946, "rev_payout": 0.55, "deal_q1": 18, "deal_slab": "TSM-<20 Dealer billed", "deal_t75": 18, "deal_t100": 20, "deal_q2ach": 17, "deal_achpct": 0.85, "deal_payout": 0, "deal_btg100": 3, "deal_btg_next": 4, "rng_q1prod": 241, "rng_q1deal": 18, "rng_q1bucket": "12-15", "rng_q2prod": 179, "rng_q2deal": 17, "rng_q1rb": 13.38888888888889, "rng_q2rb": 10.529411764705882, "rng_btg": -2.859477124183007, "rng_payout": 0, "con_comp": 0, "con_opus": 6, "con_total": 6, "con_btg_100": 0, "con_btg_125": 2, "con_btg_150": 3, "con_btg_200": 4, "weighted_payout": 0.35500000000000004, "avg_visit": 6.53125, "visit_payout": 1, "cei_pct": 0.5735, "cei_payout": 0.5, "current_payout": 0.17750000000000002, "final_payout": 0.41002500000000014}, {"name": "Faiyaz Khan", "office": "Hazaribagh", "type": "TSM", "rev_tgt_trade": 142.32173657810873, "rev_ach_trade": 121.9717185, "rev_achpct_trade": 0.8570139841784443, "rev_btg100": 20.350018078108732, "rev_btg110": 34.58219173591961, "rev_tgt_insti": 5.907961414051082, "rev_ach_insti": 2.705888, "rev_achpct_insti": 0.4580070535945792, "rev_tgt_total": 148.2296979921598, "rev_ach_total": 124.6776065, "rev_achpct_total": 0.8411108447822276, "rev_maxachv": 0.8570139841784443, "rev_payout": 0.7500000000000001, "deal_q1": 44, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 40, "deal_t100": 44, "deal_q2ach": 42, "deal_achpct": 0.9545454545454546, "deal_payout": 0.75, "deal_btg100": 2, "deal_btg_next": 3, "rng_q1prod": 631, "rng_q1deal": 44, "rng_q1bucket": "12-15", "rng_q2prod": 511, "rng_q2deal": 48, "rng_q1rb": 14.340909090909092, "rng_q2rb": 10.645833333333334, "rng_btg": 3.695075757575758, "rng_payout": 0, "con_comp": 3, "con_opus": 4, "con_total": 7, "con_btg_100": -2, "con_btg_125": 0, "con_btg_150": 1, "con_btg_200": 2, "weighted_payout": 0.6500000000000001, "avg_visit": 6.694915254237288, "visit_payout": 1, "cei_pct": 0.8314, "cei_payout": 0.9, "current_payout": 0.5850000000000002, "final_payout": 0.7507500000000003}, {"name": "Sanjay Kumar", "office": "Hazaribagh", "type": "TSM", "rev_tgt_trade": 63.61105443252503, "rev_ach_trade": 48.2937963, "rev_achpct_trade": 0.7592044610929582, "rev_btg100": 15.317258132525033, "rev_btg110": 21.67836357577754, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 63.61105443252503, "rev_ach_total": 48.2937963, "rev_achpct_total": 0.7592044610929582, "rev_maxachv": 0.7592044610929582, "rev_payout": 0.65, "deal_q1": 35, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 32, "deal_t100": 35, "deal_q2ach": 29, "deal_achpct": 0.8285714285714286, "deal_payout": 0, "deal_btg100": 6, "deal_btg_next": 7, "rng_q1prod": 380, "rng_q1deal": 35, "rng_q1bucket": "10-12", "rng_q2prod": 270, "rng_q2deal": 31, "rng_q1rb": 10.857142857142858, "rng_q2rb": 8.709677419354838, "rng_btg": -2.1474654377880196, "rng_payout": 0, "con_comp": 5, "con_opus": 5, "con_total": 10, "con_btg_100": -5, "con_btg_125": -3, "con_btg_150": -2, "con_btg_200": -1, "weighted_payout": 0.525, "avg_visit": 8.732142857142858, "visit_payout": 1.05, "cei_pct": 0.8223999999999999, "cei_payout": 0.9, "current_payout": 0.49612500000000004, "final_payout": 0.6063750000000001}, {"name": "Piyush Kumar", "office": "Hazaribagh", "type": "TSM", "rev_tgt_trade": 97.20947505142621, "rev_ach_trade": 72.08854729999999, "rev_achpct_trade": 0.7415794320652731, "rev_btg100": 25.120927751426223, "rev_btg110": 34.841875256568855, "rev_tgt_insti": 2.98276456365738, "rev_ach_insti": 1.4178695, "rev_achpct_insti": 0.47535414537091364, "rev_tgt_total": 100.1922396150836, "rev_ach_total": 73.50641679999998, "rev_achpct_total": 0.7336537947688899, "rev_maxachv": 0.7415794320652731, "rev_payout": 0.64, "deal_q1": 35, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 32, "deal_t100": 35, "deal_q2ach": 29, "deal_achpct": 0.8285714285714286, "deal_payout": 0, "deal_btg100": 6, "deal_btg_next": 7, "rng_q1prod": 443, "rng_q1deal": 35, "rng_q1bucket": "12-15", "rng_q2prod": 316, "rng_q2deal": 34, "rng_q1rb": 12.657142857142857, "rng_q2rb": 9.294117647058824, "rng_btg": -3.3630252100840323, "rng_payout": 0, "con_comp": 3, "con_opus": 5, "con_total": 8, "con_btg_100": -3, "con_btg_125": -1, "con_btg_150": 0, "con_btg_200": 1, "weighted_payout": 0.47000000000000003, "avg_visit": 6.294117647058823, "visit_payout": 1, "cei_pct": 0.6597, "cei_payout": 0.7, "current_payout": 0.329, "final_payout": 0.54285}, {"name": "Ram prawesh kumar Singh", "office": "Hazaribagh", "type": "TSE", "rev_tgt_trade": 63.75097471878591, "rev_ach_trade": 52.7144234, "rev_achpct_trade": 0.8268802733217866, "rev_btg100": 11.03655131878591, "rev_btg110": 17.4116487906645, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 63.75097471878591, "rev_ach_total": 52.7144234, "rev_achpct_total": 0.8268802733217866, "rev_maxachv": 0.8268802733217866, "rev_payout": 0.7200000000000001, "deal_q1": 37, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 33, "deal_t100": 37, "deal_q2ach": 31, "deal_achpct": 0.8378378378378378, "deal_payout": 0, "deal_btg100": 6, "deal_btg_next": 7, "rng_q1prod": 386, "rng_q1deal": 37, "rng_q1bucket": "10-12", "rng_q2prod": 275, "rng_q2deal": 36, "rng_q1rb": 10.432432432432432, "rng_q2rb": 7.638888888888889, "rng_btg": -2.7935435435435423, "rng_payout": 0, "con_comp": 4, "con_opus": 3, "con_total": 7, "con_btg_100": -2, "con_btg_125": 0, "con_btg_150": 1, "con_btg_200": 2, "weighted_payout": 0.48500000000000004, "avg_visit": 6.388888888888889, "visit_payout": 1, "cei_pct": 0.8302666666666667, "cei_payout": 0.9, "current_payout": 0.43650000000000005, "final_payout": 0.5601750000000002}, {"name": "Ravi Yadav", "office": "Hazaribagh", "type": "TSM", "rev_tgt_trade": 63.79767604501851, "rev_ach_trade": 53.05296370000001, "rev_achpct_trade": 0.8315814460477126, "rev_btg100": 10.744712345018506, "rev_btg110": 17.124479949520364, "rev_tgt_insti": 0, "rev_ach_insti": 0.16876, "rev_achpct_insti": 0, "rev_tgt_total": 63.79767604501851, "rev_ach_total": 53.221723700000005, "rev_achpct_total": 0.834226683467974, "rev_maxachv": 0.834226683467974, "rev_payout": 0.7300000000000001, "deal_q1": 31, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 28, "deal_t100": 31, "deal_q2ach": 33, "deal_achpct": 1.064516129032258, "deal_payout": 2, "deal_btg100": -2, "deal_btg_next": -1, "rng_q1prod": 372, "rng_q1deal": 31, "rng_q1bucket": "12-15", "rng_q2prod": 349, "rng_q2deal": 35, "rng_q1rb": 12, "rng_q2rb": 9.971428571428572, "rng_btg": -2.0285714285714285, "rng_payout": 0, "con_comp": 4, "con_opus": 5, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.9650000000000001, "avg_visit": 9.132075471698114, "visit_payout": 1.05, "cei_pct": 0.6353, "cei_payout": 0.7, "current_payout": 0.7092750000000001, "final_payout": 1.1145750000000003}, {"name": "Vikash Kumar", "office": "Hazaribagh", "type": "TSE", "rev_tgt_trade": 50.44433225458438, "rev_ach_trade": 34.5821653, "rev_achpct_trade": 0.685551057063644, "rev_btg100": 15.862166954584382, "rev_btg110": 20.906600180042823, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 50.44433225458438, "rev_ach_total": 34.5821653, "rev_achpct_total": 0.685551057063644, "rev_maxachv": 0.685551057063644, "rev_payout": 0.5800000000000001, "deal_q1": 38, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 34, "deal_t100": 38, "deal_q2ach": 29, "deal_achpct": 0.7631578947368421, "deal_payout": 0, "deal_btg100": 9, "deal_btg_next": 10, "rng_q1prod": 321, "rng_q1deal": 38, "rng_q1bucket": "less than 10", "rng_q2prod": 224, "rng_q2deal": 34, "rng_q1rb": 8.447368421052632, "rng_q2rb": 6.588235294117647, "rng_btg": -1.8591331269349851, "rng_payout": 0, "con_comp": 2, "con_opus": 5, "con_total": 7, "con_btg_100": -2, "con_btg_125": 0, "con_btg_150": 1, "con_btg_200": 2, "weighted_payout": 0.41500000000000004, "avg_visit": 5.872727272727273, "visit_payout": 0.9, "cei_pct": 0.4946, "cei_payout": 0.5, "current_payout": 0.18675000000000003, "final_payout": 0.4793250000000001}, {"name": "SOURAV ANAND", "office": "Hazaribagh", "type": "TSE", "rev_tgt_trade": 76.63785632420478, "rev_ach_trade": 67.1021325, "rev_achpct_trade": 0.8755742360033486, "rev_btg100": 9.53572382420478, "rev_btg110": 17.199509456625265, "rev_tgt_insti": 0, "rev_ach_insti": 0.28564, "rev_achpct_insti": 0, "rev_tgt_total": 76.63785632420478, "rev_ach_total": 67.3877725, "rev_achpct_total": 0.8793013757447271, "rev_maxachv": 0.8793013757447271, "rev_payout": 0.7700000000000001, "deal_q1": 31, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 28, "deal_t100": 31, "deal_q2ach": 28, "deal_achpct": 0.9032258064516129, "deal_payout": 0.75, "deal_btg100": 3, "deal_btg_next": 4, "rng_q1prod": 399, "rng_q1deal": 31, "rng_q1bucket": "12-15", "rng_q2prod": 307, "rng_q2deal": 31, "rng_q1rb": 12.870967741935484, "rng_q2rb": 9.903225806451612, "rng_btg": -2.967741935483872, "rng_payout": 0, "con_comp": 5, "con_opus": 5, "con_total": 10, "con_btg_100": -5, "con_btg_125": -3, "con_btg_150": -2, "con_btg_200": -1, "weighted_payout": 0.7350000000000001, "avg_visit": 5.464285714285714, "visit_payout": 0.9, "cei_pct": 0.6544, "cei_payout": 0.7, "current_payout": 0.46305, "final_payout": 0.8489250000000003}, {"name": "Sanjiv Kumar", "office": "Hazaribagh", "type": "TSM", "rev_tgt_trade": 67.38346285029587, "rev_ach_trade": 62.35061440000001, "rev_achpct_trade": 0.925310332277265, "rev_btg100": 5.032848450295859, "rev_btg110": 11.771194735325452, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 67.38346285029587, "rev_ach_total": 62.35061440000001, "rev_achpct_total": 0.925310332277265, "rev_maxachv": 0.925310332277265, "rev_payout": 0.8200000000000002, "deal_q1": 34, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 31, "deal_t100": 34, "deal_q2ach": 34, "deal_achpct": 1, "deal_payout": 1, "deal_btg100": 0, "deal_btg_next": 1, "rng_q1prod": 407, "rng_q1deal": 34, "rng_q1bucket": "10-12", "rng_q2prod": 386, "rng_q2deal": 39, "rng_q1rb": 11.970588235294118, "rng_q2rb": 9.897435897435898, "rng_btg": -2.07315233785822, "rng_payout": 0, "con_comp": 3, "con_opus": 3, "con_total": 6, "con_btg_100": -1, "con_btg_125": 1, "con_btg_150": 2, "con_btg_200": 3, "weighted_payout": 0.7100000000000001, "avg_visit": 7.883333333333334, "visit_payout": 1.05, "cei_pct": 0.6987666666666666, "cei_payout": 0.7, "current_payout": 0.52185, "final_payout": 0.8200500000000003}, {"name": "Akhtar Husain", "office": "Hazaribagh", "type": "TSM", "rev_tgt_trade": 60.96836973169037, "rev_ach_trade": 48.39527960000001, "rev_achpct_trade": 0.7937768356440885, "rev_btg100": 12.573090131690364, "rev_btg110": 18.66992710485941, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 60.96836973169037, "rev_ach_total": 48.39527960000001, "rev_achpct_total": 0.7937768356440885, "rev_maxachv": 0.7937768356440885, "rev_payout": 0.6900000000000001, "deal_q1": 36, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 32, "deal_t100": 36, "deal_q2ach": 31, "deal_achpct": 0.8611111111111112, "deal_payout": 0, "deal_btg100": 5, "deal_btg_next": 6, "rng_q1prod": 336, "rng_q1deal": 36, "rng_q1bucket": "less than 10", "rng_q2prod": 267, "rng_q2deal": 35, "rng_q1rb": 9.333333333333334, "rng_q2rb": 7.628571428571429, "rng_btg": -1.704761904761905, "rng_payout": 0, "con_comp": 4, "con_opus": 4, "con_total": 8, "con_btg_100": -3, "con_btg_125": -1, "con_btg_150": 0, "con_btg_200": 1, "weighted_payout": 0.49500000000000005, "avg_visit": 7.275862068965517, "visit_payout": 1.05, "cei_pct": 0.8771666666666667, "cei_payout": 0.95, "current_payout": 0.4937625, "final_payout": 0.5717250000000001}, {"name": "Amit Singh", "office": "Ranchi", "type": "TSE", "rev_tgt_trade": 96.49987957814648, "rev_ach_trade": 88.50172199999999, "rev_achpct_trade": 0.9171174346215685, "rev_btg100": 7.99815757814649, "rev_btg110": 17.64814553596115, "rev_tgt_insti": 17.66631652888956, "rev_ach_insti": 39.3312309, "rev_achpct_insti": 2.2263402127818788, "rev_tgt_total": 114.16619610703603, "rev_ach_total": 127.83295289999998, "rev_achpct_total": 1.1197093120291994, "rev_maxachv": 1.1197093120291994, "rev_payout": 1.52, "deal_q1": 40, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 36, "deal_t100": 40, "deal_q2ach": 41, "deal_achpct": 1.025, "deal_payout": 1.5, "deal_btg100": -1, "deal_btg_next": 0, "rng_q1prod": 504, "rng_q1deal": 40, "rng_q1bucket": "12-15", "rng_q2prod": 429, "rng_q2deal": 45, "rng_q1rb": 12.6, "rng_q2rb": 9.533333333333333, "rng_btg": -3.0666666666666664, "rng_payout": 0, "con_comp": 3, "con_opus": 3, "con_total": 6, "con_btg_100": -1, "con_btg_125": 1, "con_btg_150": 2, "con_btg_200": 3, "weighted_payout": 1.1600000000000001, "avg_visit": 6.901639344262295, "visit_payout": 1, "cei_pct": 0.5967333333333333, "cei_payout": 0.5, "current_payout": 0.5800000000000001, "final_payout": 1.3398000000000003}, {"name": "Alok Raj", "office": "Ranchi", "type": "TSM", "rev_tgt_trade": 208.8089823426314, "rev_ach_trade": 194.7439478, "rev_achpct_trade": 0.932641621137005, "rev_btg100": 14.065034542631395, "rev_btg110": 34.94593277689455, "rev_tgt_insti": 38.37296533470018, "rev_ach_insti": 12.1828915, "rev_achpct_insti": 0.31748631865526344, "rev_tgt_total": 247.18194767733158, "rev_ach_total": 206.9268393, "rev_achpct_total": 0.8371438175174503, "rev_maxachv": 0.932641621137005, "rev_payout": 0.8300000000000002, "deal_q1": 37, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 33, "deal_t100": 37, "deal_q2ach": 33, "deal_achpct": 0.8918918918918919, "deal_payout": 0, "deal_btg100": 4, "deal_btg_next": 5, "rng_q1prod": 518, "rng_q1deal": 37, "rng_q1bucket": "12-15", "rng_q2prod": 435, "rng_q2deal": 38, "rng_q1rb": 14, "rng_q2rb": 11.447368421052632, "rng_btg": -2.552631578947368, "rng_payout": 0, "con_comp": 5, "con_opus": 5, "con_total": 10, "con_btg_100": -5, "con_btg_125": -3, "con_btg_150": -2, "con_btg_200": -1, "weighted_payout": 0.6150000000000001, "avg_visit": 6.642857142857143, "visit_payout": 1, "cei_pct": 0.9358666666666667, "cei_payout": 1, "current_payout": 0.6150000000000001, "final_payout": 0.7103250000000002}, {"name": "Nisha Kumari", "office": "Ranchi", "type": "TSM", "rev_tgt_trade": 111.08634377995728, "rev_ach_trade": 94.7319827, "rev_achpct_trade": 0.8527779336013397, "rev_btg100": 16.354361079957272, "rev_btg110": 27.462995457953014, "rev_tgt_insti": 17.666316528889563, "rev_ach_insti": 20.5009671, "rev_achpct_insti": 1.1604550991982374, "rev_tgt_total": 128.75266030884683, "rev_ach_total": 115.2329498, "rev_achpct_total": 0.8949947094186925, "rev_maxachv": 0.8949947094186925, "rev_payout": 0.7900000000000001, "deal_q1": 35, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 32, "deal_t100": 35, "deal_q2ach": 31, "deal_achpct": 0.8857142857142857, "deal_payout": 0, "deal_btg100": 4, "deal_btg_next": 5, "rng_q1prod": 493, "rng_q1deal": 35, "rng_q1bucket": "12-15", "rng_q2prod": 410, "rng_q2deal": 32, "rng_q1rb": 14.085714285714285, "rng_q2rb": 12.8125, "rng_btg": -1.2732142857142854, "rng_payout": 0, "con_comp": 3, "con_opus": 5, "con_total": 8, "con_btg_100": -3, "con_btg_125": -1, "con_btg_150": 0, "con_btg_200": 1, "weighted_payout": 0.5450000000000002, "avg_visit": 7.338983050847458, "visit_payout": 1.05, "cei_pct": 0.852, "cei_payout": 0.95, "current_payout": 0.5436375000000001, "final_payout": 0.6294750000000002}, {"name": "Aman Mandal", "office": "Ranchi", "type": "TSM", "rev_tgt_trade": 119.3874574150113, "rev_ach_trade": 69.9174359, "rev_achpct_trade": 0.5856346840267733, "rev_btg100": 49.4700215150113, "rev_btg110": 61.408767256512434, "rev_tgt_insti": 11.87349054136584, "rev_ach_insti": 4.2546485999999994, "rev_achpct_insti": 0.3583317462693305, "rev_tgt_total": 131.26094795637715, "rev_ach_total": 74.1720845, "rev_achpct_total": 0.5650735093323425, "rev_maxachv": 0.5856346840267733, "rev_payout": 0, "deal_q1": 44, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 40, "deal_t100": 44, "deal_q2ach": 41, "deal_achpct": 0.9318181818181818, "deal_payout": 0.75, "deal_btg100": 3, "deal_btg_next": 4, "rng_q1prod": 554, "rng_q1deal": 44, "rng_q1bucket": "12-15", "rng_q2prod": 442, "rng_q2deal": 43, "rng_q1rb": 12.590909090909092, "rng_q2rb": 10.279069767441861, "rng_btg": -2.3118393234672308, "rng_payout": 0, "con_comp": 4, "con_opus": 4, "con_total": 8, "con_btg_100": -3, "con_btg_125": -1, "con_btg_150": 0, "con_btg_200": 1, "weighted_payout": 0, "avg_visit": 7.051724137931035, "visit_payout": 1.05, "cei_pct": 0.7714666666666666, "cei_payout": 0.8, "current_payout": 0, "final_payout": 0}, {"name": "Wasim Ansari", "office": "Ranchi", "type": "TSE", "rev_tgt_trade": 111.98274455816738, "rev_ach_trade": 94.5577663, "rev_achpct_trade": 0.8443958636045369, "rev_btg100": 17.424978258167386, "rev_btg110": 28.62325271398413, "rev_tgt_insti": 2.98276456365738, "rev_ach_insti": 3.1102469999999993, "rev_achpct_insti": 1.0427396911898081, "rev_tgt_total": 114.96550912182477, "rev_ach_total": 97.6680133, "rev_achpct_total": 0.8495418673482736, "rev_maxachv": 0.8495418673482736, "rev_payout": 0.7400000000000001, "deal_q1": 35, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 32, "deal_t100": 35, "deal_q2ach": 33, "deal_achpct": 0.9428571428571428, "deal_payout": 0.75, "deal_btg100": 2, "deal_btg_next": 3, "rng_q1prod": 465, "rng_q1deal": 35, "rng_q1bucket": "12-15", "rng_q2prod": 411, "rng_q2deal": 35, "rng_q1rb": 13.285714285714286, "rng_q2rb": 11.742857142857142, "rng_btg": -1.5428571428571445, "rng_payout": 0, "con_comp": 4, "con_opus": 5, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.72, "avg_visit": 4.389830508474576, "visit_payout": 0.8, "cei_pct": 0.8253666666666666, "cei_payout": 0.9, "current_payout": 0.5184, "final_payout": 0.8316000000000001}, {"name": "Ravikant Kumar", "office": "Ranchi", "type": "TSE", "rev_tgt_trade": 77.05780087542433, "rev_ach_trade": 40.569790499999996, "rev_achpct_trade": 0.5264851843564449, "rev_btg100": 36.48801037542434, "rev_btg110": 44.193790462966774, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 77.05780087542433, "rev_ach_total": 40.569790499999996, "rev_achpct_total": 0.5264851843564449, "rev_maxachv": 0.5264851843564449, "rev_payout": 0, "deal_q1": 26, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 23, "deal_t100": 26, "deal_q2ach": 21, "deal_achpct": 0.8076923076923077, "deal_payout": 0, "deal_btg100": 5, "deal_btg_next": 6, "rng_q1prod": 273, "rng_q1deal": 27, "rng_q1bucket": "10-12", "rng_q2prod": 204, "rng_q2deal": 25, "rng_q1rb": 10.11111111111111, "rng_q2rb": 8.16, "rng_btg": -1.9511111111111106, "rng_payout": 0, "con_comp": 4, "con_opus": 5, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0, "avg_visit": 5.551724137931035, "visit_payout": 0.9, "cei_pct": 0.8301000000000001, "cei_payout": 0.9, "current_payout": 0, "final_payout": 0}, {"name": "Ashish Toppo", "office": "Ranchi", "type": "TSE", "rev_tgt_trade": 87.20896251241714, "rev_ach_trade": 61.19768009999999, "rev_achpct_trade": 0.701736132811882, "rev_btg100": 26.011282412417152, "rev_btg110": 34.73217866365888, "rev_tgt_insti": 0, "rev_ach_insti": 1.1643245, "rev_achpct_insti": 0, "rev_tgt_total": 87.20896251241714, "rev_ach_total": 62.36200459999999, "rev_achpct_total": 0.7150871057676056, "rev_maxachv": 0.7150871057676056, "rev_payout": 0.61, "deal_q1": 31, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 28, "deal_t100": 31, "deal_q2ach": 30, "deal_achpct": 0.967741935483871, "deal_payout": 0.75, "deal_btg100": 1, "deal_btg_next": 2, "rng_q1prod": 332, "rng_q1deal": 31, "rng_q1bucket": "10-12", "rng_q2prod": 299, "rng_q2deal": 32, "rng_q1rb": 10.709677419354838, "rng_q2rb": 9.34375, "rng_btg": -1.365927419354838, "rng_payout": 0, "con_comp": 4, "con_opus": 5, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.655, "avg_visit": 6.592592592592593, "visit_payout": 1, "cei_pct": 0.8445999999999999, "cei_payout": 0.9, "current_payout": 0.5895, "final_payout": 0.7565250000000001}, {"name": "Aditya Jha", "office": "Ranchi", "type": "TSM", "rev_tgt_trade": 85.6025988760535, "rev_ach_trade": 40.4666476, "rev_achpct_trade": 0.4727268579613201, "rev_btg100": 45.135951276053504, "rev_btg110": 53.69621116365886, "rev_tgt_insti": 0, "rev_ach_insti": 0.5625819999999999, "rev_achpct_insti": 0, "rev_tgt_total": 85.6025988760535, "rev_ach_total": 41.0292296, "rev_achpct_total": 0.4792988780563475, "rev_maxachv": 0.4792988780563475, "rev_payout": 0, "deal_q1": 37, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 33, "deal_t100": 37, "deal_q2ach": 29, "deal_achpct": 0.7837837837837838, "deal_payout": 0, "deal_btg100": 8, "deal_btg_next": 9, "rng_q1prod": 345, "rng_q1deal": 38, "rng_q1bucket": "less than 10", "rng_q2prod": 290, "rng_q2deal": 35, "rng_q1rb": 9.078947368421053, "rng_q2rb": 8.285714285714286, "rng_btg": -0.7932330827067666, "rng_payout": 0, "con_comp": 3, "con_opus": 4, "con_total": 7, "con_btg_100": -2, "con_btg_125": 0, "con_btg_150": 1, "con_btg_200": 2, "weighted_payout": 0, "avg_visit": 6.022222222222222, "visit_payout": 1, "cei_pct": 0.9132666666666667, "cei_payout": 1, "current_payout": 0, "final_payout": 0}, {"name": "Shubham Kumar", "office": "Ranchi", "type": "TSE", "rev_tgt_trade": 41.52665841384203, "rev_ach_trade": 25.5326375, "rev_achpct_trade": 0.6148493154818649, "rev_btg100": 15.994020913842029, "rev_btg110": 20.146686755226234, "rev_tgt_insti": 2.98276456365738, "rev_ach_insti": 1.50415, "rev_achpct_insti": 0.5042804981415143, "rev_tgt_total": 44.50942297749941, "rev_ach_total": 27.0367875, "rev_achpct_total": 0.6074396316858062, "rev_maxachv": 0.6148493154818649, "rev_payout": 0.51, "deal_q1": 23, "deal_slab": "TSE-15-24 Dealer billed", "deal_t75": 21, "deal_t100": 23, "deal_q2ach": 22, "deal_achpct": 0.9565217391304348, "deal_payout": 0.75, "deal_btg100": 1, "deal_btg_next": 2, "rng_q1prod": 225, "rng_q1deal": 23, "rng_q1bucket": "less than 10", "rng_q2prod": 189, "rng_q2deal": 27, "rng_q1rb": 9.782608695652174, "rng_q2rb": 7, "rng_btg": -2.782608695652174, "rng_payout": 0, "con_comp": 3, "con_opus": 3, "con_total": 6, "con_btg_100": -1, "con_btg_125": 1, "con_btg_150": 2, "con_btg_200": 3, "weighted_payout": 0.505, "avg_visit": 6.6, "visit_payout": 1, "cei_pct": 0.5280666666666667, "cei_payout": 0.5, "current_payout": 0.2525, "final_payout": 0.5832750000000001}, {"name": "Satyam Singh", "office": "Ranchi", "type": "TSM", "rev_tgt_trade": 98.29268113456672, "rev_ach_trade": 92.1390243, "rev_achpct_trade": 0.9373945571172069, "rev_btg100": 6.153656834566718, "rev_btg110": 15.982924948023395, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 98.29268113456672, "rev_ach_total": 92.1390243, "rev_achpct_total": 0.9373945571172069, "rev_maxachv": 0.9373945571172069, "rev_payout": 0.8300000000000002, "deal_q1": 30, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 27, "deal_t100": 30, "deal_q2ach": 29, "deal_achpct": 0.9666666666666667, "deal_payout": 0.75, "deal_btg100": 1, "deal_btg_next": 2, "rng_q1prod": 393, "rng_q1deal": 30, "rng_q1bucket": "12-15", "rng_q2prod": 341, "rng_q2deal": 32, "rng_q1rb": 13.1, "rng_q2rb": 10.65625, "rng_btg": -2.4437499999999996, "rng_payout": 0, "con_comp": 5, "con_opus": 4, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.7650000000000001, "avg_visit": 6.862068965517241, "visit_payout": 1, "cei_pct": 0.9189333333333333, "cei_payout": 1, "current_payout": 0.7650000000000001, "final_payout": 0.8835750000000002}, {"name": "Sourabh Agarwal", "office": "Jamsedpur", "type": "TSM", "rev_tgt_trade": 79.4673463299698, "rev_ach_trade": 84.39704389999999, "rev_achpct_trade": 1.0620342542905705, "rev_btg100": -4.929697570030186, "rev_btg110": 3.017037062966807, "rev_tgt_insti": 11.815922828102162, "rev_ach_insti": 8.350178, "rev_achpct_insti": 0.7066886032922052, "rev_tgt_total": 91.28326915807196, "rev_ach_total": 92.74722189999999, "rev_achpct_total": 1.0160374705620254, "rev_maxachv": 1.0620342542905705, "rev_payout": 1.12, "rng_q1prod": 414, "rng_q1deal": 27, "rng_q1bucket": "15 & Above", "rng_q2prod": 390, "rng_q2deal": 32, "rng_q1rb": 15.333333333333334, "rng_q2rb": 12.1875, "rng_btg": -3.145833333333334, "rng_payout": 0, "con_opus": 5, "con_comp": 5, "con_total": 10}, {"name": "Sachin Ray", "office": "Jamsedpur", "type": "TSM", "rev_tgt_trade": 86.63891994052452, "rev_ach_trade": 83.56813589999999, "rev_achpct_trade": 0.9645565290676229, "rev_btg100": 3.0707840405245292, "rev_btg110": 11.734676034576992, "rev_tgt_insti": 17.608748815625884, "rev_ach_insti": 4.1757571, "rev_achpct_insti": 0.23714104526804664, "rev_tgt_total": 104.2476687561504, "rev_ach_total": 87.74389299999999, "rev_achpct_total": 0.8416868602140638, "rev_maxachv": 0.9645565290676229, "rev_payout": 0.8600000000000002, "deal_q1": 22, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 20, "deal_t100": 22, "deal_q2ach": 23, "deal_achpct": 1.0454545454545454, "deal_payout": 1.3, "deal_btg100": -1, "deal_btg_next": 0, "rng_q1prod": 301, "rng_q1deal": 22, "rng_q1bucket": "12-15", "rng_q2prod": 285, "rng_q2deal": 25, "rng_q1rb": 13.681818181818182, "rng_q2rb": 11.4, "rng_btg": -2.2818181818181813, "rng_payout": 0, "con_comp": 4, "con_opus": 5, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.8900000000000001, "avg_visit": 6.661290322580645, "visit_payout": 1, "cei_pct": 0.9118666666666667, "cei_payout": 1, "current_payout": 0.8900000000000001, "final_payout": 1.0279500000000004}, {"name": "Shivani Tuteja", "office": "Jamsedpur", "type": "TSM", "rev_tgt_trade": 130.8547806889969, "rev_ach_trade": 165.27726209999997, "rev_achpct_trade": 1.26305864584967, "rev_btg100": -34.422481411003076, "rev_btg110": -21.337003342103372, "rev_tgt_insti": 23.631845656204327, "rev_ach_insti": 22.6040042, "rev_achpct_insti": 0.9565060862720015, "rev_tgt_total": 154.48662634520122, "rev_ach_total": 187.88126629999996, "rev_achpct_total": 1.216165248376764, "rev_maxachv": 1.26305864584967, "rev_payout": 2, "deal_q1": 34, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 31, "deal_t100": 34, "deal_q2ach": 34, "deal_achpct": 1, "deal_payout": 1, "deal_btg100": 0, "deal_btg_next": 1, "rng_q1prod": 490, "rng_q1deal": 34, "rng_q1bucket": "12-15", "rng_q2prod": 480, "rng_q2deal": 36, "rng_q1rb": 14.411764705882353, "rng_q2rb": 13.333333333333334, "rng_btg": -1.0784313725490193, "rng_payout": 0, "con_comp": 5, "con_opus": 4, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 1.4, "avg_visit": 6.915254237288136, "visit_payout": 1, "cei_pct": 0.9259333333333334, "cei_payout": 1, "current_payout": 1.4, "final_payout": 1.617}, {"name": "Nitish Sharma", "office": "Jamsedpur", "type": "TSM", "rev_tgt_trade": 123.84984060698514, "rev_ach_trade": 88.3684555, "rev_achpct_trade": 0.7135128722565026, "rev_btg100": 35.481385106985144, "rev_btg110": 47.86636916768366, "rev_tgt_insti": 0, "rev_ach_insti": 0, "rev_achpct_insti": 0, "rev_tgt_total": 123.84984060698514, "rev_ach_total": 88.3684555, "rev_achpct_total": 0.7135128722565026, "rev_maxachv": 0.7135128722565026, "rev_payout": 0.61, "deal_q1": 52, "deal_slab": "TSM->=30 Dealer billed", "deal_t75": 47, "deal_t100": 52, "deal_q2ach": 49, "deal_achpct": 0.9423076923076923, "deal_payout": 0.75, "deal_btg100": 3, "deal_btg_next": 4, "rng_q1prod": 700, "rng_q1deal": 52, "rng_q1bucket": "12-15", "rng_q2prod": 572, "rng_q2deal": 53, "rng_q1rb": 13.461538461538462, "rng_q2rb": 10.79245283018868, "rng_btg": -2.669085631349782, "rng_payout": 0, "con_comp": 5, "con_opus": 4, "con_total": 9, "con_btg_100": -11, "con_btg_125": -9, "con_btg_150": -8, "con_btg_200": -7, "weighted_payout": 0.655, "avg_visit": 7.176470588235294, "visit_payout": 1.05, "cei_pct": 0.8871666666666667, "cei_payout": 0.95, "current_payout": 0.6533625000000001, "final_payout": 0.7565250000000001}, {"name": "Akash Tiwari", "office": "Jamsedpur", "type": "TSM", "rev_tgt_trade": 65.9738985608379, "rev_ach_trade": 56.906016300000005, "rev_achpct_trade": 0.8625534876876204, "rev_btg100": 9.06788226083789, "rev_btg110": 15.665272116921685, "rev_tgt_insti": 11.508190583801078, "rev_ach_insti": 2.36769, "rev_achpct_insti": 0.2057395541687291, "rev_tgt_total": 77.48208914463898, "rev_ach_total": 59.27370630000001, "rev_achpct_total": 0.7649988139755933, "rev_maxachv": 0.8625534876876204, "rev_payout": 0.7600000000000001, "deal_q1": 27, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 24, "deal_t100": 27, "deal_q2ach": 23, "deal_achpct": 0.8518518518518519, "deal_payout": 0, "deal_btg100": 4, "deal_btg_next": 5, "rng_q1prod": 292, "rng_q1deal": 27, "rng_q1bucket": "10-12", "rng_q2prod": 229, "rng_q2deal": 25, "rng_q1rb": 10.814814814814815, "rng_q2rb": 9.16, "rng_btg": -1.6548148148148147, "rng_payout": 0, "con_comp": 4, "con_opus": 3, "con_total": 7, "con_btg_100": -2, "con_btg_125": 0, "con_btg_150": 1, "con_btg_200": 2, "weighted_payout": 0.5050000000000001, "avg_visit": 7.15625, "visit_payout": 1.05, "cei_pct": 0.9453333333333334, "cei_payout": 1, "current_payout": 0.5302500000000001, "final_payout": 0.5832750000000002}, {"name": "Deepak Gupta", "office": "Jamsedpur", "type": "TSM", "rev_tgt_trade": 67.15032360400669, "rev_ach_trade": 46.117585999999996, "rev_achpct_trade": 0.6867812919556545, "rev_btg100": 21.03273760400669, "rev_btg110": 27.74776996440736, "rev_tgt_insti": 0, "rev_ach_insti": 0.7872117000000001, "rev_achpct_insti": 0, "rev_tgt_total": 67.15032360400669, "rev_ach_total": 46.904797699999996, "rev_achpct_total": 0.698504417887888, "rev_maxachv": 0.698504417887888, "rev_payout": 0.5900000000000001, "deal_q1": 21, "deal_slab": "TSM-21-29 Dealer billed", "deal_t75": 19, "deal_t100": 21, "deal_q2ach": 24, "deal_achpct": 1.1428571428571428, "deal_payout": 2, "deal_btg100": -3, "deal_btg_next": -2, "rng_q1prod": 290, "rng_q1deal": 21, "rng_q1bucket": "12-15", "rng_q2prod": 281, "rng_q2deal": 27, "rng_q1rb": 13.80952380952381, "rng_q2rb": 10.407407407407407, "rng_btg": -3.4021164021164036, "rng_payout": 0, "con_comp": 4, "con_opus": 5, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.895, "avg_visit": 6.67741935483871, "visit_payout": 1, "cei_pct": 0.9028, "cei_payout": 1, "current_payout": 0.895, "final_payout": 1.0337250000000002}, {"name": "Ashu Kumar", "office": "Jamsedpur", "type": "TSE", "rev_tgt_trade": 74.93845742024973, "rev_ach_trade": 72.0454077, "rev_achpct_trade": 0.961394325159034, "rev_btg100": 2.893049720249735, "rev_btg110": 10.386895462274708, "rev_tgt_insti": 0, "rev_ach_insti": 0.304632, "rev_achpct_insti": 0, "rev_tgt_total": 74.93845742024973, "rev_ach_total": 72.3500397, "rev_achpct_total": 0.9654594208453736, "rev_maxachv": 0.9654594208453736, "rev_payout": 0.8600000000000002, "deal_q1": 33, "deal_slab": "TSE->=25 Dealer billed", "deal_t75": 30, "deal_t100": 33, "deal_q2ach": 32, "deal_achpct": 0.9696969696969697, "deal_payout": 0.75, "deal_btg100": 1, "deal_btg_next": 2, "rng_q1prod": 448, "rng_q1deal": 33, "rng_q1bucket": "12-15", "rng_q2prod": 348, "rng_q2deal": 34, "rng_q1rb": 13.575757575757576, "rng_q2rb": 10.235294117647058, "rng_btg": -3.340463458110518, "rng_payout": 0, "con_comp": 4, "con_opus": 5, "con_total": 9, "con_btg_100": -4, "con_btg_125": -2, "con_btg_150": -1, "con_btg_200": 0, "weighted_payout": 0.78, "avg_visit": 6.896551724137931, "visit_payout": 1, "cei_pct": 0.8118666666666666, "cei_payout": 0.9, "current_payout": 0.7020000000000001, "final_payout": 0.9009000000000001}];
+</script>
+<script>
+/* ============ CONFIG ============ */
+const GRADE_BASE = {
+  'TSE':    {p100:23500, p200:47000, label:'Territory Sales Executive'},
+  'STSE':   {p100:24500, p200:49000, label:'Senior Territory Sales Executive'},
+  'ATSM':   {p100:26000, p200:52000, label:'Asst. Territory Sales Manager'},
+  'TSM':    {p100:28500, p200:57000, label:'Territory Sales Manager'},
+  'SR.TSM': {p100:32500, p200:65000, label:'Senior Territory Sales Manager'},
+};
+const PARAM_COLORS = { rev:'var(--coral)', deal:'var(--teal)', rng:'var(--purple)', con:'var(--green)' };
+const PARAM_COLORS_HEX = { rev:'#e8734a', deal:'#16a190', rng:'#8b6cd9', con:'#4caf7d' };
+const fmtINR = n => '\u20b9' + Math.round(n).toLocaleString('en-IN');
+const fmtPct = n => (n*100).toFixed(1) + '%';
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+/* ============ POLICY FORMULAS (verified against source workbook) ============ */
+
+// Parameter 1: Revenue (GSR Value) — 50% weight — EXACT slab formula from circular
+function revenuePayoutPct(achFrac){
+  const a = achFrac*100;
+  if (a < 60) return 0;
+  if (a < 70) return (50 + (a-60)*1)/100;
+  if (a < 80) return (60 + (a-70)*1)/100;
+  if (a < 90) return (70 + (a-80)*1)/100;
+  if (a < 100) return (80 + (a-90)*1)/100;
+  if (a < 110) return (100 + (a-100)*2)/100;
+  if (a < 120) return (150 + (a-110)*2)/100;
+  return 2.0;
+}
+
+// Parameter 4: Contractor activation — 10% weight — EXACT stepped table from circular
+function contractorPayoutPct(count){
+  if (count >= 9) return 2.0;
+  if (count === 8) return 1.5;
+  if (count === 7) return 1.25;
+  if (count === 6) return 1.0;
+  if (count === 5) return 0.8;
+  if (count <= 0) return 0;
+  return (count/5) * 0.8; // estimated ramp below the first published tier
+}
+
+// Visit multiplier — EXACT table from circular
+function visitPayoutPct(avg){
+  if (avg >= 7) return 1.05;
+  if (avg >= 6) return 1.00;
+  if (avg >= 5) return 0.90;
+  return 0.80;
+}
+
+// CEI multiplier — EXACT table from circular
+function ceiPayoutPct(ceiFrac){
+  const c = ceiFrac*100;
+  if (c >= 98) return 1.10;
+  if (c >= 90) return 1.00;
+  if (c >= 85) return 0.95;
+  if (c >= 80) return 0.90;
+  if (c >= 70) return 0.80;
+  if (c >= 60) return 0.70;
+  return 0.50;
+}
+
+// Parameter 2: Active Dealer Billing — 20% weight — EXACT, reconstructed and verified
+// against all 35 employees' actual computed payouts (34/35 exact, 1 boundary rounding case).
+// Below each person's own 75%-target dealer count: 0%. Between 75%-target and 100%-target: flat 75%.
+// At/above the 100%-target, each extra dealer billed climbs a tier ladder whose steepness
+// depends on which Q1 baseline bucket (low / mid / top) the person started Q2 in.
+function dealerTierOf(slab){
+  if (!slab) return null;
+  if (slab.includes('<15') || slab.includes('<18') || slab.includes('<20')) return 'low';
+  if (slab.includes('15-24') || slab.includes('18-24') || slab.includes('21-29')) return 'mid';
+  if (slab.includes('>=25') || slab.includes('>=30')) return 'top';
+  return null;
+}
+function dealerPayoutPct(q2ach, t75, t100, slab){
+  if (t75 == null || t100 == null) return 0;
+  if (q2ach < t75) return 0;
+  if (q2ach < t100) return 0.75;
+  const delta = q2ach - t100;
+  if (delta <= 0) return 1.0;
+  const tier = dealerTierOf(slab);
+  if (tier === 'low'){
+    if (delta >= 4) return 2.0;
+    if (delta >= 3) return 1.5;
+    if (delta >= 2) return 1.3;
+    return 1.2;
+  }
+  if (tier === 'mid'){
+    if (delta >= 3) return 2.0;
+    if (delta >= 2) return 1.5;
+    return 1.3;
+  }
+  // top
+  if (delta >= 2) return 2.0;
+  return 1.5;
+}
+
+// Parameter 3: Range Selling — 20% weight — EXACT, reconstructed and verified against
+// all 36 employees' actual computed payouts (36/36 exact match). Buckets below "12-15"
+// use fixed circular thresholds; "12-15" and "15 & Above" buckets use the person's own
+// Q1 range-billing number as the 100% target.
+function rangePayoutPct(bucket, q1, q2){
+  let t75, t100;
+  if (bucket === 'less than 10'){ t75 = 10; t100 = 11; }
+  else if (bucket === '10-12'){ t75 = 11; t100 = q1; }
+  else if (bucket === '12-15'){ t75 = null; t100 = q1; }
+  else if (bucket === '15 & Above'){ t75 = null; t100 = q1; }
+  else return 0;
+
+  if (t75 !== null && q2 < t75) return 0;
+  if (q2 < t100) return t75 !== null ? 0.75 : 0;
+  if (bucket === '15 & Above') return q2 >= t100+1 ? 2.0 : 1.0;
+  if (q2 >= t100+2) return 2.0;
+  if (q2 >= t100+1) return 1.5;
+  return 1.0;
+}
+
+/* ============ COMPOSITE CALC ============ */
+function computeOutcome(e, overrides){
+  const o = overrides || {};
+  // Revenue achievement uses whichever is higher of trade-only or trade+institution
+  // achievement (the circular's own "Max achv" logic — combined targets apply to TSE/TSM).
+  const revAch   = o.revAch   != null ? o.revAch   : e.rev_maxachv;
+  const dealAch  = o.dealAch  != null ? o.dealAch  : e.deal_q2ach;
+  const rngAch   = o.rngAch   != null ? o.rngAch   : e.rng_q2rb;
+  const conCount = o.conCount != null ? o.conCount : e.con_total;
+  const avgVisit = o.avgVisit != null ? o.avgVisit : e.avg_visit;
+  const ceiPct   = o.ceiPct   != null ? o.ceiPct   : e.cei_pct;
+
+  const eligible = revAch >= 0.60;
+
+  const revPay  = eligible ? revenuePayoutPct(revAch) : 0;
+  const dealPay = (eligible && e.deal_t75 != null) ? dealerPayoutPct(dealAch, e.deal_t75, e.deal_t100, e.deal_slab) : 0;
+  const rngPay  = (eligible && e.rng_q1bucket != null) ? rangePayoutPct(e.rng_q1bucket, e.rng_q1rb, rngAch) : 0;
+  const conPay  = (eligible && e.con_total != null) ? contractorPayoutPct(conCount) : 0;
+  const visitPay = (e.avg_visit != null) ? visitPayoutPct(avgVisit) : 1.0;
+  const ceiPay   = (e.cei_pct != null) ? ceiPayoutPct(ceiPct) : 1.0;
+
+  const weighted = eligible ? (0.5*revPay + 0.2*(dealPay||0) + 0.2*(rngPay||0) + 0.1*(conPay||0)) : 0;
+  const totalPayoutPct = eligible ? weighted * visitPay * ceiPay : 0;
+  const potentialPct = eligible ? weighted * 1.05 * 1.10 : 0;
+
+  const base = GRADE_BASE[e.type] || GRADE_BASE.TSE;
+  const money = base.p100 * totalPayoutPct;
+  const potentialMoney = base.p100 * potentialPct;
+
+  return { revPay, dealPay, rngPay, conPay, visitPay, ceiPay, weighted, eligible, totalPayoutPct, potentialPct, money, potentialMoney, base };
+}
+
+// Range selling 75%/100% target markers, by Q1 bucket (mirrors rangePayoutPct above)
+function rngT100(e){
+  if (e.rng_q1bucket == null) return null;
+  if (e.rng_q1bucket === 'less than 10') return 11;
+  return e.rng_q1rb; // '10-12', '12-15', '15 & Above' all target the person's own Q1 number
+}
+function rngT75(e){
+  if (e.rng_q1bucket == null) return null;
+  if (e.rng_q1bucket === 'less than 10') return 10;
+  if (e.rng_q1bucket === '10-12') return 11;
+  return null; // '12-15' and '15 & Above' have no separate 75% marker
+}
+
+/* ============ LIVE SYNC (db capability) ============ */
+let dbNS = null;
+let userNS = null;
+let canWrite = true;
+const overriddenNames = new Set();
+
+function slugify(name){
+  return name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+}
+
+// Recompute every field derived from the four raw revenue inputs (trade/insti target/achieved).
+function recomputeRevenueDerived(e){
+  e.rev_achpct_trade = e.rev_tgt_trade ? e.rev_ach_trade/e.rev_tgt_trade : 0;
+  e.rev_tgt_total = e.rev_tgt_trade + (e.rev_tgt_insti||0);
+  e.rev_ach_total = e.rev_ach_trade + (e.rev_ach_insti||0);
+  e.rev_achpct_total = e.rev_tgt_total ? e.rev_ach_total/e.rev_tgt_total : 0;
+  e.rev_maxachv = Math.max(e.rev_achpct_trade, e.rev_achpct_total);
+  e.rev_btg100 = e.rev_tgt_trade*1.0 - e.rev_ach_trade;
+  e.rev_btg110 = e.rev_tgt_trade*1.1 - e.rev_ach_trade;
+}
+
+function applyOverrideDoc(name, data){
+  const e = EMP_DATA.find(x=>x.name===name);
+  if (!e || !data) return;
+  if (data.tgt_trade != null) e.rev_tgt_trade = data.tgt_trade;
+  if (data.ach_trade != null) e.rev_ach_trade = data.ach_trade;
+  if (data.tgt_insti != null) e.rev_tgt_insti = data.tgt_insti;
+  if (data.ach_insti != null) e.rev_ach_insti = data.ach_insti;
+  recomputeRevenueDerived(e);
+  e._updatedAt = data.updatedAt;
+  overriddenNames.add(name);
+}
+
+function setSyncBadge(state, label){
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  el.className = 'sync-badge sync-' + state;
+  el.innerHTML = '&#9679; ' + label;
+}
+
+async function initLiveSync(){
+  try {
+    dbNS = await claude.use('db');
+  } catch(err){ dbNS = null; }
+  if (!dbNS){
+    setSyncBadge('offline', 'This device only');
+    document.getElementById('updateBtn').title = 'Live sync needs this page opened from its shared claude.ai link inside your organization.';
+    return;
+  }
+  try {
+    userNS = await claude.use('user');
+    if (userNS && userNS.can){
+      const w = await userNS.can('data.write');
+      canWrite = (w === false) ? false : true;
+    }
+  } catch(err){ /* keep default */ }
+
+  if (!canWrite){
+    setSyncBadge('readonly', 'Live \u00b7 view only');
+  } else {
+    setSyncBadge('live', 'Live \u00b7 syncing');
+  }
+
+  try {
+    dbNS.collection('revenue_overrides').onSnapshot(
+      (snap) => {
+        snap.docs.forEach(doc => {
+          if (doc.exists) applyOverrideDoc(doc.data().name, doc.data());
+        });
+        renderRoster();
+        if (getSelectedEmp()) renderDetail();
+        if (!document.getElementById('teamView').classList.contains('hidden')) renderTeamView();
+        const cnt = document.getElementById('overrideCount');
+        if (cnt) cnt.textContent = `${overriddenNames.size} of ${EMP_DATA.length} people have live-updated numbers`;
+      },
+      (err) => { setSyncBadge('offline', 'Sync error'); }
+    );
+  } catch(err){ setSyncBadge('offline', 'Sync unavailable'); }
+}
+
+async function pushRevenueUpdate(name, payload){
+  if (!dbNS) return { ok:false, msg:'Live sync is not available in this view.' };
+  if (!canWrite) return { ok:false, msg:'You have view-only access to this dashboard.' };
+  const e = EMP_DATA.find(x=>x.name===name);
+  if (!e) return { ok:false, msg:`No one named "${name}" found in the roster.` };
+  const body = { name, updatedAt: new Date().toISOString() };
+  if (payload.ach_trade != null && !isNaN(payload.ach_trade)) body.ach_trade = payload.ach_trade;
+  if (payload.ach_insti != null && !isNaN(payload.ach_insti)) body.ach_insti = payload.ach_insti;
+  if (payload.tgt_trade != null && !isNaN(payload.tgt_trade)) body.tgt_trade = payload.tgt_trade;
+  if (payload.tgt_insti != null && !isNaN(payload.tgt_insti)) body.tgt_insti = payload.tgt_insti;
+  try {
+    await dbNS.collection('revenue_overrides').doc(slugify(name)).set(body);
+    return { ok:true };
+  } catch(err){
+    return { ok:false, msg: (err && err.message) || 'Save failed, please try again.' };
+  }
+}
+
+async function clearAllOverrides(){
+  if (!dbNS || !canWrite) return;
+  const snap = await dbNS.collection('revenue_overrides').get();
+  for (const doc of snap.docs){
+    await doc.ref ? doc.ref.delete() : dbNS.collection('revenue_overrides').doc(doc.id).delete();
+  }
+}
+
+/* ============ UPDATE MODAL UI ============ */
+function populateSingleEmpSelect(){
+  const sel = document.getElementById('singleEmpSelect');
+  sel.innerHTML = EMP_DATA.slice().sort((a,b)=>a.name.localeCompare(b.name))
+    .map(e => `<option value="${encodeURIComponent(e.name)}">${e.name} (${e.office})</option>`).join('');
+}
+
+function wireUpdateModal(){
+  const backdrop = document.getElementById('updateModalBackdrop');
+  document.getElementById('updateBtn').addEventListener('click', () => {
+    populateSingleEmpSelect();
+    document.getElementById('modalStatus').innerHTML = '';
+    backdrop.classList.remove('hidden');
+  });
+  document.getElementById('closeModalBtn').addEventListener('click', () => backdrop.classList.add('hidden'));
+  backdrop.addEventListener('click', (ev) => { if (ev.target === backdrop) backdrop.classList.add('hidden'); });
+
+  document.querySelectorAll('.modal-tab').forEach(tab => tab.addEventListener('click', () => {
+    document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tabSingle').classList.toggle('hidden', tab.dataset.tab!=='single');
+    document.getElementById('tabBulk').classList.toggle('hidden', tab.dataset.tab!=='bulk');
+  }));
+
+  document.getElementById('singleSubmitBtn').addEventListener('click', async () => {
+    const name = decodeURIComponent(document.getElementById('singleEmpSelect').value);
+    const payload = {
+      ach_trade: parseFloat(document.getElementById('singleAchTrade').value),
+      ach_insti: parseFloat(document.getElementById('singleAchInsti').value),
+      tgt_trade: parseFloat(document.getElementById('singleTgtTrade').value),
+      tgt_insti: parseFloat(document.getElementById('singleTgtInsti').value),
+    };
+    const btn = document.getElementById('singleSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Saving\u2026';
+    const res = await pushRevenueUpdate(name, payload);
+    btn.disabled = false; btn.textContent = 'Save & push to everyone';
+    showModalStatus(res.ok, res.ok ? `${name}'s numbers are live for everyone.` : res.msg);
+    if (res.ok){
+      document.getElementById('singleAchTrade').value='';
+      document.getElementById('singleAchInsti').value='';
+      document.getElementById('singleTgtTrade').value='';
+      document.getElementById('singleTgtInsti').value='';
+    }
+  });
+
+  document.getElementById('bulkSubmitBtn').addEventListener('click', async () => {
+    const text = document.getElementById('bulkText').value.trim();
+    if (!text) return;
+    const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+    const btn = document.getElementById('bulkSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Saving\u2026';
+    let ok=0, fail=[];
+    for (const line of lines){
+      const parts = line.split(',').map(s=>s.trim());
+      const name = parts[0];
+      const match = EMP_DATA.find(e => e.name.toLowerCase() === name.toLowerCase());
+      if (!match){ fail.push(`"${name}" not found`); continue; }
+      const payload = { ach_trade: parseFloat(parts[1]), ach_insti: parts[2]!=null ? parseFloat(parts[2]) : undefined };
+      const res = await pushRevenueUpdate(match.name, payload);
+      if (res.ok) ok++; else fail.push(`${match.name}: ${res.msg}`);
+    }
+    btn.disabled = false; btn.textContent = 'Save all & push to everyone';
+    document.getElementById('bulkResult').innerHTML = `Updated <b>${ok}</b> of ${lines.length}.` + (fail.length ? `<br>Issues: ${fail.join('; ')}` : '');
+    if (ok>0) document.getElementById('bulkText').value = '';
+  });
+
+  document.getElementById('clearOverridesBtn').addEventListener('click', async () => {
+    if (!confirm('Reset every person\'s revenue numbers back to the original circular data? This affects everyone.')) return;
+    await clearAllOverrides();
+    location.reload();
+  });
+}
+function showModalStatus(ok, msg){
+  document.getElementById('modalStatus').innerHTML = `<div class="modal-status-msg ${ok?'status-ok':'status-err'}">${msg}</div>`;
+}
+
+/* ============ UI STATE ============ */
+let selectedName = null;
+let officeFilter = 'All';
+let searchTerm = '';
+let simOverrides = {};
+let sortKey = 'totalPayoutPct';
+let sortDir = -1;
+
+function empColor(name){
+  const colors = ['#e8734a','#16a190','#8b6cd9','#4caf7d','#e0b23e','#5b8ac9'];
+  let h=0; for (let i=0;i<name.length;i++) h = (h*31 + name.charCodeAt(i)) % colors.length;
+  return colors[h];
+}
+function initials(name){
+  return name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+/* ============ ROSTER ============ */
+function renderRoster(){
+  const offices = ['All', ...Array.from(new Set(EMP_DATA.map(e=>e.office))).sort()];
+  const chipRow = document.getElementById('officeChips');
+  chipRow.innerHTML = offices.map(o => `<button class="chip ${o===officeFilter?'active':''}" data-office="${o}">${o}</button>`).join('');
+  chipRow.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+    officeFilter = c.dataset.office; renderRoster();
+  }));
+
+  let list = EMP_DATA.filter(e => (officeFilter==='All' || e.office===officeFilter));
+  if (searchTerm) list = list.filter(e => e.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  list = list.slice().sort((a,b)=> a.name.localeCompare(b.name));
+
+  document.getElementById('rosterCount').textContent = `${list.length} of ${EMP_DATA.length} team members`;
+  const rl = document.getElementById('rosterList');
+  rl.innerHTML = list.map(e => {
+    const out = computeOutcome(e, e.name===selectedName ? simOverrides : {});
+    const pct = out.eligible ? fmtPct(out.totalPayoutPct) : 'N/E';
+    const color = out.eligible ? (out.totalPayoutPct>=1 ? 'var(--green)' : out.totalPayoutPct>=0.7 ? 'var(--amber)' : 'var(--red)') : 'var(--red)';
+    return `<div class="emp-row ${e.name===selectedName?'active':''}" data-name="${encodeURIComponent(e.name)}">
+      <div class="emp-avatar" style="background:${empColor(e.name)}">${initials(e.name)}</div>
+      <div class="emp-meta">
+        <div class="emp-name">${e.name}</div>
+        <div class="emp-office">${e.office} &middot; ${e.type}</div>
+      </div>
+      <div class="emp-pct" style="color:${color}">${pct}</div>
+    </div>`;
+  }).join('');
+  rl.querySelectorAll('.emp-row').forEach(row => row.addEventListener('click', () => {
+    selectedName = decodeURIComponent(row.dataset.name);
+    simOverrides = {};
+    renderRoster();
+    renderDetail();
+  }));
+}
+
+/* ============ DETAIL PANEL ============ */
+function getSelectedEmp(){ return EMP_DATA.find(e=>e.name===selectedName); }
+
+function renderDetail(){
+  const panel = document.getElementById('detailPanel');
+  const e = getSelectedEmp();
+  if (!e){
+    panel.innerHTML = `<div class="card" style="text-align:center; padding:60px 20px; color:var(--ink-faint);">
+      <div style="font-size:34px; margin-bottom:10px;">&#127912;</div>
+      Pick someone from the list to see their Q2 payout breakdown and try the simulator.
+    </div>`;
+    return;
+  }
+  const out = computeOutcome(e, simOverrides);
+  const base = out.base;
+  const eligNote = out.eligible
+    ? `<div class="eligibility-banner elig-ok">&#9989; Eligible for payout &mdash; clearing the 60% Sales Revenue threshold</div>`
+    : `<div class="eligibility-banner elig-bad">&#9888;&#65039; Below the 60% Sales Revenue threshold &mdash; no incentive is payable this quarter, on any parameter, until Revenue achievement reaches 60%.</div>`;
+
+  panel.innerHTML = `
+    <div class="card hero">
+      <div class="hero-left">
+        <div class="hero-id">
+          <div class="hero-avatar" style="background:${empColor(e.name)}">${initials(e.name)}</div>
+          <div>
+            <h2 class="hero-name">${e.name}</h2>
+            <div class="hero-tags"><span class="tag">${e.office}</span><span class="tag">${base.label}</span></div>
+          </div>
+        </div>
+        <div class="hero-stat-row">
+          <div><div class="hstat-label">Weighted parameter score</div><div class="hstat-val">${fmtPct(out.weighted)}</div></div>
+          <div><div class="hstat-label">Visit multiplier</div><div class="hstat-val">${fmtPct(out.visitPay)}</div></div>
+          <div><div class="hstat-label">CEI multiplier</div><div class="hstat-val">${fmtPct(out.ceiPay)}</div></div>
+        </div>
+        ${eligNote}
+      </div>
+      <div class="hero-right">
+        <div>
+          <div class="money-label">Estimated payout at current numbers (of 100% base ${fmtINR(base.p100)})</div>
+          <div class="money-val">${fmtINR(out.money)}</div>
+          <div class="money-sub">${fmtPct(out.totalPayoutPct)} of the 100% base payout &middot; capped scheme max is ${fmtINR(base.p200*2)} at 200%</div>
+        </div>
+        <div>
+          <div class="money-label">Upside if visits &amp; CEI both hit top tier this quarter</div>
+          <div class="hstat-val" style="color:var(--teal)">${fmtINR(out.potentialMoney)}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Q2 parameters</h2>
+      <p class="section-sub">50% Revenue &middot; 20% Active Dealers &middot; 20% Range Selling &middot; 10% Contractor Activation</p>
+      <div class="param-grid" id="paramGrid"></div>
+    </div>
+
+    <div class="card" id="revLadderCard"></div>
+
+    <div class="card" id="ceiCard"></div>
+
+    <div class="card">
+      <h2 class="section-title">Payout simulator</h2>
+      <p class="section-sub">Drag any lever to see how the payout &#8377; changes. Numbers reset to this quarter's actuals when you switch employees.</p>
+      <div id="simSummary"></div>
+      <div id="simRows"></div>
+      <div class="disclaimer">
+        <b>Precision note:</b> All four parameters, plus the Visit and CEI multipliers, are computed from the exact slab
+        tables in the Q2 circular and cross-checked against this quarter's actual payout numbers for every person on the sheet.
+        Dealer Billing and Range Selling use each person's own 75%/100% target markers as reconstructed from the circular's
+        tiered tables; the check matched 34/35 and 36/36 people exactly, so figures right at a slab boundary can very
+        occasionally be off by one tier &mdash; confirm true edge cases with your manager.
+      </div>
+    </div>
+  `;
+  renderParamGrid(e, out);
+  renderRevLadder(e);
+  renderCeiCard(e);
+  renderSimulator(e);
+  renderSimSummary(e, out);
+}
+
+/* ============ CEI OPPORTUNITY ============ */
+const CEI_TIERS = [
+  {min:0.98, pct:1.10}, {min:0.90, pct:1.00}, {min:0.85, pct:0.95}, {min:0.80, pct:0.90},
+  {min:0.70, pct:0.80}, {min:0.60, pct:0.70}, {min:0, pct:0.50},
+];
+function nextCeiTier(ceiPct){
+  // returns the tier threshold just above current CEI%, or null if already at top
+  const sorted = CEI_TIERS.slice().sort((a,b)=>a.min-b.min);
+  for (const t of sorted){ if (t.min > ceiPct) return t; }
+  return null;
+}
+function ceiIncentiveGap(e){
+  const cur = computeOutcome(e, {});
+  const atMax = computeOutcome(e, { ceiPct: 0.99 });
+  const nextTier = nextCeiTier(e.cei_pct);
+  const atNext = nextTier ? computeOutcome(e, { ceiPct: nextTier.min }) : cur;
+  return {
+    cur, maxMoney: atMax.money, maxGap: atMax.money - cur.money,
+    nextTier, nextMoney: atNext.money, nextGap: atNext.money - cur.money,
+  };
+}
+function renderCeiCard(e){
+  const card = document.getElementById('ceiCard');
+  if (e.cei_pct == null){
+    card.innerHTML = `<h2 class="section-title">CEI opportunity</h2><p class="section-sub">No CEI data on file for this person yet.</p>`;
+    return;
+  }
+  const g = ceiIncentiveGap(e);
+  card.innerHTML = `
+    <h2 class="section-title">CEI opportunity</h2>
+    <p class="section-sub">CEI (Customer Efficiency Index) currently at <b>${fmtPct(e.cei_pct)}</b>, sitting in the <b>${fmtPct(g.cur.ceiPay)}</b> payout tier &mdash; this multiplies the whole weighted score, so it's a lever on top of every parameter above.</p>
+    <div class="ladder">
+      ${g.nextTier ? `
+        <div class="ladder-row ladder-next">
+          <div class="ladder-slab"><div class="ladder-pct">${fmtPct(g.nextTier.min)}</div><div class="ladder-tag">Next tier</div></div>
+          <div class="ladder-mid"><div class="ladder-need">CEI payout jumps to ${fmtPct(g.nextTier.pct)}</div><div class="ladder-sub">Everything else held at today's actuals</div></div>
+          <div class="ladder-money">+${fmtINR(g.nextGap)}</div>
+        </div>` : ''}
+      <div class="ladder-row">
+        <div class="ladder-slab"><div class="ladder-pct">98%+</div><div class="ladder-tag">Top tier</div></div>
+        <div class="ladder-mid"><div class="ladder-need">CEI payout at the max 110%</div><div class="ladder-sub">This is the incentive currently being missed purely due to CEI</div></div>
+        <div class="ladder-money">${g.maxGap>0.5 ? '+'+fmtINR(g.maxGap) : 'Already there'}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* ============ REVENUE SLAB LADDER ============ */
+// Every remaining slab boundary (60/70/80/90/100/110/120%) above the person's current
+// counted achievement, with the extra trade value needed and the resulting total
+// quarterly payout if every other parameter stays exactly where it is today.
+function renderRevLadder(e){
+  const card = document.getElementById('revLadderCard');
+  const usesTotal = e.rev_achpct_total > e.rev_achpct_trade;
+  const target = usesTotal ? e.rev_tgt_total : e.rev_tgt_trade;
+  const achieved = usesTotal ? e.rev_ach_total : e.rev_ach_trade;
+  const achPct = e.rev_maxachv;
+  const basisLabel = usesTotal ? 'Trade + Institutional value' : 'Trade value';
+
+  const thresholds = [60,70,80,90,100,110,120];
+  const rows = thresholds
+    .filter(t => t/100 > achPct + 0.0001)
+    .map(t => {
+      const neededValue = Math.max(0, (t/100)*target - achieved);
+      const scenario = computeOutcome(e, { revAch: t/100 });
+      return { t, neededValue, payoutAtT: revenuePayoutPct(t/100), money: scenario.money, eligible: scenario.eligible };
+    });
+
+  if (!rows.length){
+    card.innerHTML = `
+      <h2 class="section-title">Revenue slab ladder</h2>
+      <p class="section-sub">Already past the top slab (120%+) on Revenue &mdash; capped at 200% payout for this parameter. No further value needed.</p>`;
+    return;
+  }
+
+  const cur = computeOutcome(e, {});
+  card.innerHTML = `
+    <h2 class="section-title">Revenue slab ladder</h2>
+    <p class="section-sub">Extra ${basisLabel.toLowerCase()} needed to clear each remaining slab, and the total quarterly payout you'd land on if everything else stayed exactly as it is today (currently ${fmtINR(cur.money)}).</p>
+    <div class="ladder">
+      ${rows.map((r,i) => `
+        <div class="ladder-row ${i===0?'ladder-next':''}">
+          <div class="ladder-slab">
+            <div class="ladder-pct">${r.t}%</div>
+            <div class="ladder-tag">${i===0 ? 'Next slab' : ''}</div>
+          </div>
+          <div class="ladder-mid">
+            <div class="ladder-need">+${r.neededValue.toFixed(1)} L more value</div>
+            <div class="ladder-sub">Revenue parameter payout becomes ${fmtPct(r.payoutAtT)}</div>
+          </div>
+          <div class="ladder-money">${fmtINR(r.money)}</div>
+        </div>`).join('')}
+    </div>
+  `;
+}
+
+function progressBar(pct, color){
+  const w = clamp(pct*100, 2, 100);
+  return `<div class="bar-track"><div class="bar-fill" style="width:${w}%; background:${color}"></div></div>`;
+}
+
+function renderParamGrid(e, out){
+  const grid = document.getElementById('paramGrid');
+  const cards = [];
+
+  // Revenue
+  const usesTotal = e.rev_achpct_total > e.rev_achpct_trade;
+  const liveTag = overriddenNames.has(e.name) ? `<span class="est-flag" style="color:var(--green); border-color:var(--green);">Live update</span>` : '';
+  cards.push(`
+    <div class="param-card">
+      <div class="param-top">
+        <div class="param-name"><span class="dot" style="background:${PARAM_COLORS_HEX.rev}"></span>Revenue (GSR Value)<span class="param-weight">50%</span>${liveTag}</div>
+        <div class="param-payout" style="color:${PARAM_COLORS_HEX.rev}">${fmtPct(out.revPay)}</div>
+      </div>
+      ${progressBar(e.rev_maxachv, PARAM_COLORS_HEX.rev)}
+      <div class="param-rows">
+        <div class="r"><span>Trade target / achieved</span><b>${e.rev_tgt_trade.toFixed(1)} L / ${e.rev_ach_trade.toFixed(1)} L</b></div>
+        <div class="r"><span>Trade achievement</span><b>${fmtPct(e.rev_achpct_trade)}</b></div>
+        ${e.rev_tgt_insti ? `<div class="r"><span>+ Institutional achievement</span><b>${fmtPct(e.rev_achpct_insti)}</b></div>` : ''}
+        <div class="r"><span>Counted achievement (best of the two)</span><b style="color:${PARAM_COLORS_HEX.rev}">${fmtPct(e.rev_maxachv)}</b></div>
+      </div>
+      <div class="btg-note">${usesTotal ? 'Trade + Institutional combined is currently the higher, so that\u2019s what counts here. ' : ''}Need <b>${e.rev_btg100>0? '+'+e.rev_btg100.toFixed(1)+' L trade value' : 'already there'}</b> to hit the 100% mark${e.rev_btg110>0 ? `, or <b>+${e.rev_btg110.toFixed(1)} L</b> for 110%.` : '.'}</div>
+    </div>`);
+
+  // Dealer billing
+  if (e.deal_t75 != null){
+    cards.push(`
+      <div class="param-card">
+        <div class="param-top">
+          <div class="param-name"><span class="dot" style="background:${PARAM_COLORS_HEX.deal}"></span>Active Dealers &#8805;20K<span class="param-weight">20%</span></div>
+          <div class="param-payout" style="color:${PARAM_COLORS_HEX.deal}">${fmtPct(out.dealPay)}</div>
+        </div>
+        ${progressBar(e.deal_q2ach/e.deal_t100, PARAM_COLORS_HEX.deal)}
+        <div class="param-rows">
+          <div class="r"><span>75% payout at</span><b>${e.deal_t75} dealers</b></div>
+          <div class="r"><span>100% payout at</span><b>${e.deal_t100} dealers</b></div>
+          <div class="r"><span>Billed in Q2</span><b>${e.deal_q2ach} dealers</b></div>
+        </div>
+        <div class="btg-note">Bill <b>${Math.max(0,e.deal_t100-e.deal_q2ach)} more dealer${Math.max(0,e.deal_t100-e.deal_q2ach)===1?'':'s'}</b> to reach the 100% mark.</div>
+      </div>`);
+  } else {
+    cards.push(missingCard('Active Dealers &#8805;20K','20%','deal'));
+  }
+
+  // Range selling
+  if (e.rng_q1bucket != null){
+    const t100 = rngT100(e);
+    const gap = t100 - e.rng_q2rb;
+    let nextNote;
+    if (out.rngPay >= 2.0) nextNote = 'Already at the max 200% tier.';
+    else if (e.rng_q2rb < t100) nextNote = `Lift range selling by <b>${gap.toFixed(2)}</b> products/dealer to hit the 100% mark.`;
+    else {
+      const nextTierGap = (t100 + (out.rngPay>=1.5?2:1)) - e.rng_q2rb;
+      nextNote = `<b>${Math.max(0,nextTierGap).toFixed(2)}</b> more products/dealer moves you to the next tier.`;
+    }
+    cards.push(`
+      <div class="param-card">
+        <div class="param-top">
+          <div class="param-name"><span class="dot" style="background:${PARAM_COLORS_HEX.rng}"></span>Range Selling<span class="param-weight">20%</span></div>
+          <div class="param-payout" style="color:${PARAM_COLORS_HEX.rng}">${fmtPct(out.rngPay)}</div>
+        </div>
+        ${progressBar(e.rng_q2rb/t100, PARAM_COLORS_HEX.rng)}
+        <div class="param-rows">
+          <div class="r"><span>Products / dealer now</span><b>${e.rng_q2rb.toFixed(2)}</b></div>
+          <div class="r"><span>Needed for 100%</span><b>${t100.toFixed(2)}</b></div>
+        </div>
+        <div class="btg-note">${nextNote}</div>
+      </div>`);
+  } else {
+    cards.push(missingCard('Range Selling','20%','rng'));
+  }
+
+  // Contractor activation
+  if (e.con_total != null){
+    cards.push(`
+      <div class="param-card">
+        <div class="param-top">
+          <div class="param-name"><span class="dot" style="background:${PARAM_COLORS_HEX.con}"></span>Contractor Activation<span class="param-weight">10%</span></div>
+          <div class="param-payout" style="color:${PARAM_COLORS_HEX.con}">${fmtPct(out.conPay)}</div>
+        </div>
+        ${progressBar(e.con_total/9, PARAM_COLORS_HEX.con)}
+        <div class="param-rows">
+          <div class="r"><span>OPUS contractors active</span><b>${e.con_opus} / 5</b></div>
+          <div class="r"><span>Industry contractors active</span><b>${e.con_comp} / 5</b></div>
+          <div class="r"><span>Total active</span><b>${e.con_total} / 9+</b></div>
+        </div>
+        <div class="btg-note">${e.con_total>=9 ? 'Already at the max 200% tier.' : `Activate <b>${9-e.con_total} more</b> contractor${9-e.con_total===1?'':'s'} to reach the 200% tier (next tier at ${e.con_total<5?'5':e.con_total<6?'6':e.con_total<7?'7':'8'} active).`}</div>
+      </div>`);
+  } else {
+    cards.push(missingCard('Contractor Activation','10%','con'));
+  }
+
+  grid.innerHTML = cards.join('');
+}
+function missingCard(title, weight, key){
+  return `<div class="param-card" style="opacity:.6;">
+    <div class="param-top">
+      <div class="param-name"><span class="dot" style="background:${PARAM_COLORS_HEX[key]}"></span>${title}<span class="param-weight">${weight}</span></div>
+      <div class="param-payout">&mdash;</div>
+    </div>
+    <div class="param-rows"><div class="r"><span>No Q2 data on file for this person yet.</span></div></div>
+  </div>`;
+}
+
+/* ============ SIMULATOR ============ */
+function renderSimulator(e){
+  const rows = document.getElementById('simRows');
+  const parts = [];
+
+  parts.push(simRow({
+    key:'revAch', label:'Revenue achievement (counted %)', color:PARAM_COLORS_HEX.rev,
+    min:40, max:130, step:0.5, unit:'%',
+    value: (simOverrides.revAch!=null?simOverrides.revAch:e.rev_maxachv)*100,
+    display: v => v.toFixed(1)+'%',
+    onInput: v => { simOverrides.revAch = v/100; }
+  }));
+
+  if (e.deal_t75 != null){
+    parts.push(simRow({
+      key:'dealAch', label:'Active dealers billed (Q2)', color:PARAM_COLORS_HEX.deal,
+      min:Math.max(0, e.deal_t75-10), max:e.deal_t100+10, step:1, unit:'',
+      value: simOverrides.dealAch!=null?simOverrides.dealAch:e.deal_q2ach,
+      display: v => Math.round(v)+' dealers',
+      onInput: v => { simOverrides.dealAch = Math.round(v); }
+    }));
+  }
+
+  if (e.rng_q1bucket != null){
+    const t100 = rngT100(e);
+    parts.push(simRow({
+      key:'rngAch', label:'Range selling (products/dealer)', color:PARAM_COLORS_HEX.rng,
+      min:Math.max(0, t100-6), max:t100+6, step:0.1, unit:'',
+      value: simOverrides.rngAch!=null?simOverrides.rngAch:e.rng_q2rb,
+      display: v => v.toFixed(2),
+      onInput: v => { simOverrides.rngAch = v; }
+    }));
+  }
+
+  if (e.con_total != null){
+    parts.push(simRow({
+      key:'conCount', label:'Active contractors', color:PARAM_COLORS_HEX.con,
+      min:0, max:10, step:1, unit:'',
+      value: simOverrides.conCount!=null?simOverrides.conCount:e.con_total,
+      display: v => Math.round(v)+' active',
+      onInput: v => { simOverrides.conCount = Math.round(v); }
+    }));
+  }
+
+  if (e.avg_visit != null){
+    parts.push(simRow({
+      key:'avgVisit', label:'Average dealer visits / day', color:'var(--amber)',
+      min:2, max:9, step:0.1, unit:'',
+      value: simOverrides.avgVisit!=null?simOverrides.avgVisit:e.avg_visit,
+      display: v => v.toFixed(1)+' / day',
+      onInput: v => { simOverrides.avgVisit = v; }
+    }));
+  }
+
+  if (e.cei_pct != null){
+    parts.push(simRow({
+      key:'ceiPct', label:'CEI %', color:'var(--amber)',
+      min:40, max:100, step:0.5, unit:'%',
+      value: (simOverrides.ceiPct!=null?simOverrides.ceiPct:e.cei_pct)*100,
+      display: v => v.toFixed(1)+'%',
+      onInput: v => { simOverrides.ceiPct = v/100; }
+    }));
+  }
+
+  rows.innerHTML = parts.map(p=>p.html).join('') + `<div style="text-align:right; margin-top:10px;"><button class="sim-reset" id="simResetBtn">&#8635; Reset to actual Q2 numbers</button></div>`;
+  parts.forEach(p => p.bind());
+  document.getElementById('simResetBtn').addEventListener('click', () => {
+    simOverrides = {}; renderDetail();
+  });
+}
+
+function simRow(cfg){
+  const id = 'sim_'+cfg.key;
+  const html = `<div class="sim-row">
+    <div class="sim-head">
+      <div class="sim-title"><span class="dot" style="background:${cfg.color}"></span>${cfg.label}</div>
+      <div class="sim-value" id="${id}_val"><b>${cfg.display(cfg.value)}</b></div>
+    </div>
+    <input type="range" id="${id}" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}" value="${cfg.value}">
+    <div class="sim-scale"><span>${cfg.display(cfg.min)}</span><span>${cfg.display(cfg.max)}</span></div>
+  </div>`;
+  const bind = () => {
+    const input = document.getElementById(id);
+    input.addEventListener('input', () => {
+      const v = parseFloat(input.value);
+      cfg.onInput(v);
+      document.getElementById(id+'_val').innerHTML = `<b>${cfg.display(v)}</b>`;
+      const e = getSelectedEmp();
+      const out = computeOutcome(e, simOverrides);
+      renderSimSummary(e, out);
+      updateParamPayoutsOnly(e, out);
+      renderRoster();
+    });
+  };
+  return { html, bind };
+}
+
+function updateParamPayoutsOnly(e, out){
+  renderParamGrid(e, out);
+}
+
+function renderSimSummary(e, out){
+  const el = document.getElementById('simSummary');
+  if (!el) return;
+  const actual = computeOutcome(e, {});
+  const diff = out.money - actual.money;
+  const diffClass = diff>1 ? 'delta-pos' : diff<-1 ? 'delta-neg' : 'delta-zero';
+  const diffLabel = diff>1 ? `+${fmtINR(diff)} vs today` : diff<-1 ? `${fmtINR(diff)} vs today` : 'same as today';
+  el.innerHTML = `<div class="sim-summary">
+    <div>
+      <div class="money-label">Simulated payout</div>
+      <div class="big">${out.eligible ? fmtINR(out.money) : fmtINR(0)}</div>
+    </div>
+    <div class="delta ${diffClass}">${diffLabel}</div>
+    <div style="margin-left:auto; font-size:12.5px; color:var(--ink-dim);">
+      Weighted score ${fmtPct(out.weighted)} &middot; Visit &times;${fmtPct(out.visitPay)} &middot; CEI &times;${fmtPct(out.ceiPay)}
+      ${!out.eligible ? '<br><b style="color:var(--red)">Below 60% Revenue threshold &mdash; payout locked at \u20b90</b>' : ''}
+    </div>
+  </div>`;
+}
+
+/* ============ TEAM VIEW ============ */
+function renderTeamView(){
+  const results = EMP_DATA.map(e => ({ e, out: computeOutcome(e, {}), ceiGap: e.cei_pct!=null ? ceiIncentiveGap(e) : null }));
+  const eligible = results.filter(r=>r.out.eligible);
+  const totalMoney = results.reduce((s,r)=>s+r.out.money,0);
+  const avgPct = eligible.length ? eligible.reduce((s,r)=>s+r.out.totalPayoutPct,0)/eligible.length : 0;
+  const belowThreshold = results.filter(r=>!r.out.eligible).length;
+  const totalCeiMissed = results.reduce((s,r)=> s + (r.ceiGap ? r.ceiGap.maxGap : 0), 0);
+
+  document.getElementById('teamSummary').innerHTML = `
+    <div class="sstat"><div class="sstat-label">Team members</div><div class="sstat-val">${EMP_DATA.length}</div></div>
+    <div class="sstat"><div class="sstat-label">Total estimated payout</div><div class="sstat-val">${fmtINR(totalMoney)}</div></div>
+    <div class="sstat"><div class="sstat-label">Average payout % (eligible)</div><div class="sstat-val">${fmtPct(avgPct)}</div></div>
+    <div class="sstat"><div class="sstat-label">Missing due to CEI (to top tier)</div><div class="sstat-val" style="color:var(--amber)">${fmtINR(totalCeiMissed)}</div></div>
+  `;
+
+  const cols = [
+    {k:'name', label:'Name'}, {k:'office', label:'Office'}, {k:'type', label:'Grade'},
+    {k:'rev_achpct_trade', label:'Revenue %'}, {k:'weighted', label:'Weighted'},
+    {k:'totalPayoutPct', label:'Payout %'}, {k:'money', label:'Payout \u20b9'},
+    {k:'ceiMissed', label:'CEI missed \u20b9'},
+  ];
+  const thead = document.querySelector('#teamTable thead');
+  thead.innerHTML = '<tr>' + cols.map(c=>`<th data-key="${c.k}">${c.label} ${sortKey===c.k ? (sortDir===1?'&#9650;':'&#9660;') : ''}</th>`).join('') + '</tr>';
+  thead.querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.key;
+    if (sortKey===k) sortDir *= -1; else { sortKey=k; sortDir=-1; }
+    renderTeamView();
+  }));
+
+  const rowsData = results.map(r => ({
+    name:r.e.name, office:r.e.office, type:r.e.type,
+    rev_achpct_trade:r.e.rev_achpct_trade, weighted:r.out.weighted,
+    totalPayoutPct:r.out.totalPayoutPct, money:r.out.money, e:r.e, eligible:r.out.eligible,
+    ceiMissed: r.ceiGap ? r.ceiGap.maxGap : 0
+  }));
+  rowsData.sort((a,b)=>{
+    const av=a[sortKey], bv=b[sortKey];
+    if (typeof av === 'string') return sortDir===1 ? av.localeCompare(bv) : bv.localeCompare(av);
+    return sortDir===1 ? av-bv : bv-av;
+  });
+
+  const tbody = document.querySelector('#teamTable tbody');
+  tbody.innerHTML = rowsData.map((r,i) => {
+    const pillClass = !r.eligible ? 'pill-lo' : r.totalPayoutPct>=1 ? 'pill-hi' : r.totalPayoutPct>=0.7 ? 'pill-mid' : 'pill-lo';
+    return `<tr data-name="${encodeURIComponent(r.name)}">
+      <td><span class="rank-badge">${i+1}</span><span class="mini-avatar" style="background:${empColor(r.name)}">${initials(r.name)}</span>${r.name}</td>
+      <td>${r.office}</td>
+      <td>${r.type}</td>
+      <td>${fmtPct(r.rev_achpct_trade)}</td>
+      <td>${fmtPct(r.weighted)}</td>
+      <td><span class="pill ${pillClass}">${r.eligible ? fmtPct(r.totalPayoutPct) : 'Not eligible'}</span></td>
+      <td><b>${fmtINR(r.money)}</b></td>
+      <td style="color:${r.ceiMissed>500?'var(--amber)':'var(--ink-faint)'}">${r.ceiMissed>10 ? fmtINR(r.ceiMissed) : '\u2014'}</td>
+    </tr>`;
+  }).join('');
+  tbody.querySelectorAll('tr').forEach(tr => tr.addEventListener('click', () => {
+    selectedName = decodeURIComponent(tr.dataset.name);
+    simOverrides = {};
+    document.querySelector('#viewToggle button[data-view="individual"]').click();
+    renderRoster();
+    renderDetail();
+  }));
+}
+
+/* ============ WIRE UP ============ */
+document.getElementById('searchBox').addEventListener('input', e => { searchTerm = e.target.value; renderRoster(); });
+document.getElementById('viewToggle').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-view]');
+  if (!btn) return;
+  document.querySelectorAll('#viewToggle button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const view = btn.dataset.view;
+  document.getElementById('individualView').classList.toggle('hidden', view!=='individual');
+  document.getElementById('teamView').classList.toggle('hidden', view!=='team');
+  if (view==='team') renderTeamView();
+});
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const root = document.documentElement;
+  const cur = root.getAttribute('data-theme');
+  root.setAttribute('data-theme', cur==='light' ? 'dark' : 'light');
+});
+
+/* ============ INIT ============ */
+try {
+  let saved = null;
+  try { saved = localStorage.getItem('incentive_selected_emp'); } catch(err){}
+  selectedName = (saved && EMP_DATA.some(e=>e.name===saved)) ? saved : EMP_DATA[0].name;
+} catch(err) { selectedName = EMP_DATA[0].name; }
+renderRoster();
+renderDetail();
+wireUpdateModal();
+initLiveSync();
+
+// persist selection per viewer (per-viewer convenience only)
+setInterval(() => {
+  try { if (selectedName) localStorage.setItem('incentive_selected_emp', selectedName); } catch(err){}
+}, 4000);
+
+</script>
+</body>
+</html>
